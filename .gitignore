@@ -1,0 +1,16 @@
+SmallPack/ThirdParty/RakNet-master/Samples/
+SmallPack/ThirdParty/RakNet-master/RakNet_IOS_XCode/RakNetTest/RKNViewController.m
+SmallPack/ThirdParty/RakNet-master/RakNet_IOS_XCode/
+SmallPack/ThirdParty/RakNet-master/Lib/
+SmallPack/ThirdParty/RakNet-master/Help/
+SmallPack/ThirdParty/RakNet-master/DependentExtensions/
+SmallPack/ThirdParty/RakNet-master/CmakeIncludes/
+SmallPack/ThirdParty/RakNet-master/RakNet_WindowsStore8_VS2012.sln
+SmallPack/ThirdParty/RakNet-master/RakNet_WinPhone8_VS2012.sln
+SmallPack/ThirdParty/RakNet-master/RakNet_VS2008.sln
+SmallPack/ThirdParty/RakNet-master/RakNet_NativeClient_VS2010.sln
+SmallPack/ThirdParty/RakNet-master/CMakeLists.txt
+SmallPack/ThirdParty/RakNet-master/.gitignore
+SmallPack/Debug/
+*.db
+*.opendb
