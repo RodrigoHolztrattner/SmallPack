@@ -46,7 +46,7 @@ public:
 
 	// Compose a new message
 	template <typename ObjectType>
-	NetworkMessage Compose(SmallPackPacker* _packer, Operation _messageOperation, uint32_t _messageId, ObjectType& _object, NetworkMessage& _networkMessage)
+	bool Compose(SmallPackPacker* _packer, Operation _messageOperation, uint32_t _messageId, ObjectType& _object, NetworkMessage& _networkMessage)
 	{
 		NetworkMessage newMessage;
 
@@ -61,6 +61,9 @@ public:
 			// Could not allocate data for the message
 			return false;
 		}
+
+		// Copy the message object
+		memcpy(newMessage.messageData.dataPtr, &_object, sizeof(ObjectType));
 
 		// Set the network message
 		_networkMessage = newMessage;

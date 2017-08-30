@@ -14,3 +14,4 @@ SmallPack/ThirdParty/RakNet-master/.gitignore
 SmallPack/Debug/
 *.db
 *.opendb
+SmallPack/ThirdParty/boost/

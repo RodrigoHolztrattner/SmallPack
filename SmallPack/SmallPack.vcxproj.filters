@@ -335,6 +335,9 @@
     <ClCompile Include="BaseClass.cpp" />
     <ClCompile Include="SmallPackPacker.cpp" />
     <ClCompile Include="SmallPackMessageComposer.cpp" />
+    <ClCompile Include="SmallPackCommunicationChannel.cpp" />
+    <ClCompile Include="SmallPackCommunicationController.cpp" />
+    <ClCompile Include="SmallPackMessagePackList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
@@ -815,6 +818,9 @@
     <ClInclude Include="SmallPackPacker.h" />
     <ClInclude Include="SmallPackMessages.h" />
     <ClInclude Include="SmallPackMessageComposer.h" />
+    <ClInclude Include="SmallPackCommunicationChannel.h" />
+    <ClInclude Include="SmallPackCommunicationController.h" />
+    <ClInclude Include="SmallPackMessagePackList.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ThirdParty\RakNet-master\Source\CMakeLists.txt">

@@ -1,0 +1,16 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: SmallPackCommunicationChannel.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "SmallPackCommunicationChannel.h"
+
+SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel()
+{
+}
+
+SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(const SmallPack::SmallPackCommunicationChannel& other)
+{
+}
+
+SmallPack::SmallPackCommunicationChannel::~SmallPackCommunicationChannel()
+{
+}

@@ -9,7 +9,9 @@
 #include "SmallPackConfig.h"
 
 #include <cstdint>
+#include <vector>
 #include "SmallPackMessages.h"
+#include "SmallPackMessagePackList.h"
 
 /////////////
 // DEFINES //
@@ -42,6 +44,12 @@ private:
 	// The total message reserved data
 	const uint32_t TotalReservedData = 1024;
 
+	// The number of reserved data message
+	const uint32_t NumberReservedDataMessages = 1024;
+
+	// The max pack data size
+	const uint32_t MessagePackMaxData = 1024;
+
 public:
 	SmallPackPacker();
 	SmallPackPacker(const SmallPackPacker&);
@@ -52,18 +60,29 @@ public:
 	// Initialize
 	bool Initialize();
 
-	// Pack a given message and prepare it to be sent
-	void PackMessage(NetworkMessage& _message /*, CommunicationChannel _channel*/);
+	// Request a new message pack
+	MessagePack* RequestMessagePack();
+
+	// Release a message pack
+	void ReleaseMessagePack(MessagePack* _messagePack);
+
+	// Pack a given message into a pack
+	bool PackMessage(NetworkMessage& _message, MessagePack& _pack);
+
+	// Unpack a message pack
+	std::vector<NetworkMessage> UnpackMessagePack(MessagePack& _pack);
+
+	// Reset the current frame
+	void ResetFrame();
 
 protected:
 
 	// Request message data
-	template <typename ObjectType>
 	bool RequestReservedMessageData(MessageData** _messageData)
 	{
 		// Set the required size
 		//uint32_t requiredSize = sizeof(ObjectType);
-		uint32_t requiredSize = pow2roundup(sizeof(ObjectType));
+		uint32_t requiredSize = pow2roundup(NumberReservedDataMessages);
 		
 		// Check if we have enough remaining data
 		if (m_TotalReservedMessageDataUsed + requiredSize >= TotalReservedData)
@@ -78,13 +97,25 @@ protected:
 		m_TotalReservedMessageDataUsed += requiredSize;
 
 		// Set the data location
-		*_messageData->dataPtr = selectedDataSlice;
-		*_messageData->dataSize = requiredSize;
+		(*_messageData)->dataPtr = selectedDataSlice;
+		(*_messageData)->dataSize = requiredSize;
 
 		return true;
 	}
 
-public:
+private:
+
+	// Get total messages inside pack
+	uint32_t GetTotalPackMessages(MessagePack& _pack);
+
+	// Get the total data used for a given pack
+	uint32_t GetTotalPackData(MessagePack& _pack);
+
+	// Set the total messages inside a pack
+	void SetPackTotalMessages(MessagePack& _pack, uint32_t _totalNumberMessages);
+
+	// Set the total data used for a given pack
+	void SetPackTotalData(MessagePack& _pack, uint32_t _totalNewData);
 
 ///////////////
 // VARIABLES //
@@ -95,6 +126,9 @@ private: //////
 
 	// The total message reserved data used
 	uint32_t m_TotalReservedMessageDataUsed;
+
+	// All the message packs
+	SmallPackMessagePackList m_MessagePackList;
 };
 
 // SmallPack
