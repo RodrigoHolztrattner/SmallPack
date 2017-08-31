@@ -3,8 +3,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "SmallPackCommunicationController.h"
 
-#include <thread>
-
 using namespace boost::asio::ip;
 
 SmallPack::SmallPackCommunicationController::SmallPackCommunicationController(boost::asio::io_service& _ioService) : m_ioService(_ioService), m_ConnectionSocket(_ioService)
@@ -37,8 +35,8 @@ void SmallPack::SmallPackCommunicationController::Start()
 	m_ListenForClientRequests = true;
 
 	// Start our side server
-	std::thread t1(&SmallPackCommunicationController::ListeningForRequests, this);
-
+	//m_RequestListener = std::thread(&SmallPackCommunicationController::ListeningForRequests, this);
+	ListeningForRequests();
 
 }
 
@@ -54,12 +52,13 @@ void SmallPack::SmallPackCommunicationController::ListeningForRequests()
 
 	while(m_ListenForClientRequests)
 	{
-#define max_length 1024
+		#define max_length 1024
 		char data[max_length];
 		udp::endpoint sender_endpoint;
-		size_t length = sock.receive_from(
-			boost::asio::buffer(data, max_length), sender_endpoint);
+		size_t length = sock.receive_from(boost::asio::buffer(data, max_length), sender_endpoint);
 		sock.send_to(boost::asio::buffer(data, length), sender_endpoint);
+
+
 	}
 }
 

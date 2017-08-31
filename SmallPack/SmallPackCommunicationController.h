@@ -14,6 +14,7 @@
 #include <boost\asio.hpp>
 
 #include <vector>
+#include <thread>
 
 /////////////
 // DEFINES //
@@ -82,7 +83,9 @@ private: //////
 
 	// If we should listen for client requests
 	bool m_ListenForClientRequests;
-	
+
+	// Our request listener thread
+	std::thread m_RequestListener;
 };
 
 // SmallPack

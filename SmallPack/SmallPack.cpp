@@ -25,10 +25,10 @@ int main()
 	uunpackedMessages.resize(2);
 
 	// Initialize the IO service
-	//ioService.run();
+	ioService.run();
 
 	// Create the communication controller
-	//SmallPack::SmallPackCommunicationController communcationController(ioService);
+	SmallPack::SmallPackCommunicationController communcationController(ioService);
 
 	// Initialize the message packer
 	bool result = messagePacker.Initialize();
@@ -104,17 +104,15 @@ int main()
 	//
 
 	// Initialize the communication controller so we can accept outside requests from other players
-	//result = communcationController.Initialize(2234);
+	result = communcationController.Initialize(2234);
 	if (!result)
 	{
 		// Cannot initialize the communication controller
 		exit(0);
 	}
 
-
-
 	// Start accepting incomming requests
-	//communcationController.Start();
+	communcationController.Start();
 
     return 0;
 }
