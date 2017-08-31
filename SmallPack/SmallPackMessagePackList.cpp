@@ -73,22 +73,13 @@ void SmallPack::SmallPackMessagePackList::ReleasePack(MessagePack* _pack)
 
 SmallPack::MessagePack* SmallPack::SmallPackMessagePackList::GetNextPackNode(MessagePack* _node)
 {
-	// Cast to pointer type
-	MessagePack* packPtr = (MessagePack*)_node->data;
-
-	return &packPtr[-1];
+	return _node->nextPack;
 }
 
 void SmallPack::SmallPackMessagePackList::SetPackNodePtr(MessagePack* _thisNode, MessagePack* _pointsToThisNode)
 {
-	// Cast to pointer type
-	MessagePack* packPtr = (MessagePack*)_thisNode->data;
-
-	// Get the node ptr
-	MessagePack** nodePtr = (MessagePack**)&packPtr[-1];
-
 	// Set the new ptr
-	*nodePtr = _pointsToThisNode;
+	_thisNode->nextPack = _pointsToThisNode;
 }
 
 SmallPack::MessagePack* SmallPack::SmallPackMessagePackList::AllocNewPack()
@@ -96,31 +87,18 @@ SmallPack::MessagePack* SmallPack::SmallPackMessagePackList::AllocNewPack()
 	// Increment the pack counter
 	m_PackCounter++;
 
-	// Alloc new data
-	unsigned char* newData = new unsigned char[GetAllocSize()];
+	// Create the new pack
+	MessagePack* packPtr = new MessagePack();
+	packPtr->nextPack = nullptr;
 
-	// Cast to pack ptr
-	MessagePack* packPtr = (MessagePack*)newData;
-
-	return &packPtr[1];
+	return packPtr;
 }
 
 void SmallPack::SmallPackMessagePackList::DeallocPack(MessagePack* _node)
 {
-	// Cast to pointer type
-	MessagePack* packPtr = (MessagePack*)_node->data;
-
-	// Get the real ptr
-	unsigned char* realPtr = (unsigned char*)&packPtr[-1];
-
-	// Delete the data
-	delete[] realPtr;
+	// Delete the pack
+	delete[] _node;
 
 	// Subtract one from the pack counter
 	m_PackCounter--;
-}
-
-uint32_t SmallPack::SmallPackMessagePackList::GetAllocSize()
-{
-	return MessagePack::MessagePackSize + sizeof(MessagePack*);
 }

@@ -51,11 +51,11 @@ public:
 		NetworkMessage newMessage;
 
 		// Set the message data
-		newMessage.messageOperation = _messageOperation;
-		newMessage.messageId = _messageId;
+		newMessage.messageHeader.messageOperation = _messageOperation;
+		newMessage.messageHeader.messageId = _messageId;
 
 		// Request the message data
-		bool result = _packer->RequestReservedMessageData(&newMessage.messageData);
+		bool result = _packer->RequestReservedMessageData(&newMessage.messageData, sizeof(ObjectType));
 		if (!result)
 		{
 			// Could not allocate data for the message
@@ -64,6 +64,9 @@ public:
 
 		// Copy the message object
 		memcpy(newMessage.messageData.dataPtr, &_object, sizeof(ObjectType));
+
+		// Compute the message total size
+		newMessage.ComputeMessageTotalSize();
 
 		// Set the network message
 		_networkMessage = newMessage;

@@ -26,8 +26,9 @@
 // SmallPack
 SmallPackamespaceBegin(SmallPack)
 
-// We know the SmallPackMessagePackList class
+// We know the SmallPackMessagePackList and the SmallPackPacker classes
 class SmallPackMessagePackList;
+class SmallPackPacker;
 
 // The message pack
 struct MessagePack
@@ -36,6 +37,9 @@ private:
 
 	// The SmallPackMessagePackList is a friend
 	friend SmallPackMessagePackList;
+
+	// The SmallPackPacker is a friend
+	friend SmallPackPacker;
 
 protected:
 
@@ -56,10 +60,21 @@ public:
 		return data;
 	}
 
+protected:
+
+	// The next pack ptr
+	MessagePack* nextPack;
+
+	// The tota number of messages
+	uint32_t totalNumberMessages;
+
+	// The total data used
+	uint32_t totalDataUsed;
+
 private:
 
 	// The data itself
-	unsigned char* data;
+	unsigned char data[MessagePackSize];
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,9 +115,6 @@ private:
 
 	// Dealloc a given node
 	void DeallocPack(MessagePack* _node);
-
-	// Calculate the total size that we should alloc for a new pack
-	uint32_t GetAllocSize();
 
 ///////////////
 // VARIABLES //
