@@ -4,6 +4,7 @@
 #include "SmallPackCommunicationChannel.h"
 #include <cstdio>
 #include <iostream>
+#include <stdlib.h>     /* atoi */
 
 using namespace boost::asio::ip;
 
@@ -23,13 +24,17 @@ SmallPack::SmallPackCommunicationChannel::~SmallPackCommunicationChannel()
 
 bool SmallPack::SmallPackCommunicationChannel::Initialize(const char* _host, const char* _port)
 {
+	// Resolve the ip version with the given host and port to get our iterator
 	udp::resolver resolver(m_ioService);
 	udp::resolver::query query(udp::v4(), _host, _port);
 	m_Iterator = resolver.resolve(query);
 
+	// Set the channel data
+	m_ChannelData.address.from_string(_host);
+	m_ChannelData.port = atoi(_port);
+	
 	return true;
 }
-
 
 void SmallPack::SmallPackCommunicationChannel::Send(SmallPack::MessagePack* _messagePack)
 {
@@ -41,4 +46,14 @@ void SmallPack::SmallPackCommunicationChannel::Send(SmallPack::MessagePack* _mes
 
 	// Send the message pack through this channel
 	m_Socket.send_to(boost::asio::buffer(data, length), *m_Iterator);
+}
+
+bool SmallPack::SmallPackCommunicationChannel::IsHost(boost::asio::ip::address _address, uint32_t _port)
+{
+	if (m_ChannelData.address == _address && m_ChannelData.port == _port)
+	{
+		return true;
+	}
+
+	return false;
 }

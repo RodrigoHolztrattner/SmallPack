@@ -8,6 +8,7 @@
 //////////////
 #include "SmallPackConfig.h"
 
+#include <boost\asio.hpp>
 #include <cstdint>
 #include <memory>
 
@@ -32,11 +33,15 @@ enum class Endpoint
 	Server
 };
 
-enum class Operation
+enum class Operator
 {
-	StayAlive,
-	Command,
-	Update
+	System,
+	Application
+};
+
+enum class SystemCommands
+{
+	Ping
 };
 
 struct MessageData
@@ -50,23 +55,35 @@ struct MessageHeader
 	// The message flags
 	uint32_t messageFlags;
 
-	// The message operation
-	Operation messageOperation;
+	// The message operator
+	Operator messageOperator;
 
 	// The message id
 	uint32_t messageId;
 };
 
+struct SenderInfo
+{
+	// The sender address
+	boost::asio::ip::address address;
+
+	// The sender port
+	uint32_t port;
+};
+
 struct NetworkMessage
 {
-	// The message total size
+	// The message total size <serializable>
 	uint32_t messageTotalSize;
 
-	// The message header
+	// The message header <serializable>
 	MessageHeader messageHeader;
 
-	// The message data
+	// The message data <serializable>
 	MessageData messageData;
+
+	// The sender info (only used when a message was received, ignored when composing a new one)
+	SenderInfo senderInfo;
 
 	// Serialize this message
 	void Serialize(unsigned char* _to, uint32_t& _currentPosition)

@@ -46,12 +46,12 @@ public:
 
 	// Compose a new message
 	template <typename ObjectType>
-	bool Compose(SmallPackPacker* _packer, Operation _messageOperation, uint32_t _messageId, ObjectType& _object, NetworkMessage& _networkMessage)
+	bool Compose(SmallPackPacker* _packer, Operator _messageOperator, uint32_t _messageId, ObjectType& _object, NetworkMessage& _networkMessage)
 	{
 		NetworkMessage newMessage;
 
 		// Set the message data
-		newMessage.messageHeader.messageOperation = _messageOperation;
+		newMessage.messageHeader.messageOperator = _messageOperator;
 		newMessage.messageHeader.messageId = _messageId;
 
 		// Request the message data

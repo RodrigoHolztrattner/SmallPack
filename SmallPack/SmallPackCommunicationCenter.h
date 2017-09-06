@@ -75,7 +75,7 @@ public:
 private:
 
 	// Check for messages
-	SmallPack::MessagePack* CheckForNewMessages(SmallPackMessagePackList* _messagePackList);
+	SmallPack::MessagePack* CheckForNewMessages(SmallPackMessagePackList* _messagePackList, boost::asio::ip::udp::endpoint& _endpoint);
 
 public:
 

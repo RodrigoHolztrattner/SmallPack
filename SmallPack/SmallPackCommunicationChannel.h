@@ -42,6 +42,12 @@ class SmallPackCommunicationChannel
 
 		// How much time this connection is active
 		clock_t totalTimeActive;
+
+		// The channel address
+		boost::asio::ip::address address;
+
+		// The channel port
+		uint32_t port;
 	};
 
 public:
@@ -56,6 +62,9 @@ public:
 
 	// Send a message to this channel
 	void Send(SmallPack::MessagePack* _messagePack);
+
+	// Verify if the given host is the owner of this channel
+	bool IsHost(boost::asio::ip::address _address, uint32_t _port);
 
 public:
 
