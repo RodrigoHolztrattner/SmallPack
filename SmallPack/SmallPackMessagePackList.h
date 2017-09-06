@@ -26,13 +26,16 @@
 // SmallPack
 SmallPackamespaceBegin(SmallPack)
 
-// We know the SmallPackMessagePackList and the SmallPackPacker classes
+// We know the SmallPackMessagePackList, the SmallPackPacker and the SmallPackMessagePackReceiveBuffer classes
 class SmallPackMessagePackList;
 class SmallPackPacker;
+class SmallPackMessagePackReceiveBuffer;
 
 // The message pack
 struct MessagePack
 {
+public:
+
 private:
 
 	// The SmallPackMessagePackList is a friend
@@ -41,7 +44,10 @@ private:
 	// The SmallPackPacker is a friend
 	friend SmallPackPacker;
 
-protected:
+	// The SmallPackMessagePackReceiveBuffer is a friend
+	friend SmallPackMessagePackReceiveBuffer;
+
+public:
 
 	// The message pack size
 	static const uint32_t MessagePackSize = 1024;
@@ -58,6 +64,38 @@ public:
 	unsigned char* GetData()
 	{
 		return data;
+	}
+
+	// Return the total number of messages
+	uint32_t GetTotalMessages()
+	{
+		return totalNumberMessages;
+	}
+
+	// Return the amount of data used
+	uint32_t GetTotalDataUsed()
+	{
+		return totalDataUsed;
+	}
+
+	// Copy to bytestream
+	uint32_t CopyToByteStream(unsigned char* _byteStream)
+	{
+		uint32_t position = 0;
+		memcpy(_byteStream, &totalNumberMessages, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(_byteStream, &totalDataUsed, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(_byteStream, data, sizeof(unsigned char) * totalDataUsed); position += sizeof(unsigned char) * totalDataUsed;
+
+		return position;
+	}
+
+	// Copy from bytestream
+	void CopyFromByteStream(unsigned char* _byteStream, uint32_t _totalSize)
+	{
+		uint32_t position = 0;
+		memcpy(&totalNumberMessages, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(&totalDataUsed, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(data, _byteStream, sizeof(unsigned char) * (_totalSize - position)); position += sizeof(unsigned char) * (_totalSize - position);
 	}
 
 protected:

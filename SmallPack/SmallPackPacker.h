@@ -48,8 +48,8 @@ private:
 	const uint32_t MessagePackMaxData = 512;
 
 public:
-	SmallPackPacker();
-	SmallPackPacker(const SmallPackPacker&);
+	SmallPackPacker(SmallPackMessagePackList& _messagePackList);
+//	SmallPackPacker(const SmallPackPacker&);
 	~SmallPackPacker();
 
 public:
@@ -125,7 +125,7 @@ private: //////
 	uint32_t m_TotalReservedMessageDataUsed;
 
 	// All the message packs
-	SmallPackMessagePackList m_MessagePackList;
+	SmallPackMessagePackList& m_MessagePackList;
 };
 
 // SmallPack

@@ -6,7 +6,8 @@
 #include "SmallPackPacker.h"
 #include "SmallPackMessageComposer.h"
 #include "SmallPackCommunicationChannel.h"
-#include "SmallPackCommunicationController.h"
+#include "SmallPackCommunicationCenter.h"
+#include "SmallPackMessagePackList.h"
 
 struct Vector
 {
@@ -18,17 +19,15 @@ struct Vector
 int main()
 {
 	SmallPack::SmallPackMessageComposer messageComposer;
-	SmallPack::SmallPackPacker messagePacker;
+	SmallPack::SmallPackMessagePackList messagePackList;
+	SmallPack::SmallPackPacker messagePacker(messagePackList);
 	boost::asio::io_service ioService;
-
-	std::vector<SmallPack::NetworkMessage> uunpackedMessages;
-	uunpackedMessages.resize(2);
 
 	// Initialize the IO service
 	ioService.run();
 
-	// Create the communication controller
-	SmallPack::SmallPackCommunicationController communcationController(ioService);
+	// Create the communication center
+	SmallPack::SmallPackCommunicationCenter communcationCenter(ioService);
 
 	// Initialize the message packer
 	bool result = messagePacker.Initialize();
@@ -37,82 +36,20 @@ int main()
 		return false;
 	}
 
-	//
-	//
-	//
-
-	// Request a new message pack
-	SmallPack::MessagePack* newMessagePack = messagePacker.RequestMessagePack();
-	if (newMessagePack == nullptr)
-	{
-		return false;
-	}
-
-	// Create a dummy vector
-	Vector vec1(0.0, 0.5, 6.0, 1.0);
-	Vector vec2(102323.9, 1.0, 0.0, 99.98);
-
-	// Compose some messages
-	SmallPack::NetworkMessage newMessage1;
-	SmallPack::NetworkMessage newMessage2;
-
-	// Create the first message
-	result = messageComposer.Compose<Vector>(&messagePacker, SmallPack::Operation::Command, 0, vec1, newMessage1);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Create the second message
-	result = messageComposer.Compose<Vector>(&messagePacker, SmallPack::Operation::StayAlive, 5, vec2, newMessage2);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Pack the messages
-	result = messagePacker.PackMessage(newMessage1, newMessagePack);
-	if (!result)
-	{
-		return false;
-	}
-	result = messagePacker.PackMessage(newMessage2, newMessagePack);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Unpack all messages
-	std::vector<SmallPack::NetworkMessage> unpackedMessages = messagePacker.UnpackMessagePack(newMessagePack);
-
-	// Get the unpacked object
-	Vector unpackedVector1;
-	Vector unpackedVector2;
-	result = unpackedMessages[0].GetDataObject(unpackedVector1);
-	if (!result)
-	{
-		return false;
-	}
-	result = unpackedMessages[1].GetDataObject(unpackedVector2);
-	if (!result)
-	{
-		return false;
-	}
-
-	//
-	//
-	//
-
 	// Initialize the communication controller so we can accept outside requests from other players
-	result = communcationController.Initialize(2234);
+	result = communcationCenter.Initialize(2234);
 	if (!result)
 	{
 		// Cannot initialize the communication controller
 		exit(0);
 	}
 
-	// Start accepting incomming requests
-	communcationController.Start();
+	// Our game loop
+	while (true)
+	{
+		// Do the update for our communication center
+		communcationCenter.Update(&messagePackList,& messagePacker, 0);
+	}
 
     return 0;
 }

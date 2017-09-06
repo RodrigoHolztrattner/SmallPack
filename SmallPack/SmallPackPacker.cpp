@@ -3,16 +3,18 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "SmallPackPacker.h"
 
-SmallPack::SmallPackPacker::SmallPackPacker()
+SmallPack::SmallPackPacker::SmallPackPacker(SmallPackMessagePackList& _messagePackList) : m_MessagePackList(_messagePackList)
 {
 	// Set the initial data
 	m_TotalReservedMessageDataUsed = 0;
 	m_MessagedReservedData = nullptr;
 }
 
+/*
 SmallPack::SmallPackPacker::SmallPackPacker(const SmallPack::SmallPackPacker& other)
 {
 }
+*/
 
 SmallPack::SmallPackPacker::~SmallPackPacker()
 {
@@ -25,13 +27,6 @@ bool SmallPack::SmallPackPacker::Initialize()
 	if (m_MessagedReservedData == nullptr)
 	{
 		// Allocation failed
-		return false;
-	}
-
-	// Initialize the message pack list
-	bool result = m_MessagePackList.Initialize();
-	if (!result)
-	{
 		return false;
 	}
 

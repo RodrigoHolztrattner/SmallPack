@@ -8,8 +8,10 @@
 //////////////
 #include "SmallPackConfig.h"
 #include "SmallPackMessages.h"
+#include "SmallPackMessagePackList.h"
 
 #include <boost\asio.hpp>
+#include <ctime>
 
 /////////////
 // DEFINES //
@@ -32,6 +34,16 @@ SmallPackamespaceBegin(SmallPack)
 class SmallPackCommunicationChannel
 {
 
+	// The channel data
+	struct ChannelData
+	{
+		// The time elapsed since the last ping
+		clock_t lastPingElapsedTime;
+
+		// How much time this connection is active
+		clock_t totalTimeActive;
+	};
+
 public:
 	SmallPackCommunicationChannel(boost::asio::io_service& _ioService);
 	//SmallPackCommunicationChannel(const SmallPackCommunicationChannel&);
@@ -43,7 +55,7 @@ public:
 	bool Initialize(const char* _host, const char* _port);
 
 	// Send a message to this channel
-	void Send(SmallPack::NetworkMessage& _message);
+	void Send(SmallPack::MessagePack* _messagePack);
 
 public:
 
@@ -53,6 +65,9 @@ private: //////
 
 	// The channel ID
 	uint32_t m_ChannelIdentifier;
+
+	// The channel data
+	ChannelData m_ChannelData;
 
 	// The current io service
 	boost::asio::io_service& m_ioService;

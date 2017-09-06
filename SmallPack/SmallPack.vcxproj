@@ -104,10 +104,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\ThirdParty\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\ThirdParty\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,30 +142,35 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\ThirdParty\boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\ThirdParty\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseClass.cpp" />
     <ClCompile Include="SmallPack.cpp" />
     <ClCompile Include="SmallPackCommunicationChannel.cpp" />
-    <ClCompile Include="SmallPackCommunicationController.cpp" />
+    <ClCompile Include="SmallPackCommunicationCenter.cpp" />
     <ClCompile Include="SmallPackMessageComposer.cpp" />
     <ClCompile Include="SmallPackMessagePackList.cpp" />
+    <ClCompile Include="SmallPackMessagePackReceiveBuffer.cpp" />
     <ClCompile Include="SmallPackPacker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseClass.h" />
     <ClInclude Include="SmallPackCommunicationChannel.h" />
-    <ClInclude Include="SmallPackCommunicationController.h" />
+    <ClInclude Include="SmallPackCommunicationCenter.h" />
     <ClInclude Include="SmallPackConfig.h" />
     <ClInclude Include="SmallPackMessageComposer.h" />
     <ClInclude Include="SmallPackMessagePackList.h" />
+    <ClInclude Include="SmallPackMessagePackReceiveBuffer.h" />
     <ClInclude Include="SmallPackMessages.h" />
     <ClInclude Include="SmallPackPacker.h" />
   </ItemGroup>

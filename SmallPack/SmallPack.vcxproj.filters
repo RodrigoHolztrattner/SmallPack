@@ -6,8 +6,9 @@
     <ClCompile Include="SmallPackPacker.cpp" />
     <ClCompile Include="SmallPackMessageComposer.cpp" />
     <ClCompile Include="SmallPackCommunicationChannel.cpp" />
-    <ClCompile Include="SmallPackCommunicationController.cpp" />
     <ClCompile Include="SmallPackMessagePackList.cpp" />
+    <ClCompile Include="SmallPackMessagePackReceiveBuffer.cpp" />
+    <ClCompile Include="SmallPackCommunicationCenter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
@@ -21,7 +22,8 @@
     <ClInclude Include="SmallPackMessages.h" />
     <ClInclude Include="SmallPackMessageComposer.h" />
     <ClInclude Include="SmallPackCommunicationChannel.h" />
-    <ClInclude Include="SmallPackCommunicationController.h" />
     <ClInclude Include="SmallPackMessagePackList.h" />
+    <ClInclude Include="SmallPackMessagePackReceiveBuffer.h" />
+    <ClInclude Include="SmallPackCommunicationCenter.h" />
   </ItemGroup>
 </Project>

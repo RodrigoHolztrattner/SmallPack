@@ -15,3 +15,4 @@ SmallPack/Debug/
 *.db
 *.opendb
 SmallPack/ThirdParty/boost/
+SmallPack/x64/
