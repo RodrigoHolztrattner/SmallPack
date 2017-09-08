@@ -7,7 +7,7 @@
 
 using namespace boost::asio::ip;
 
-SmallPack::SmallPackCommunicationCenter::SmallPackCommunicationCenter(boost::asio::io_service& _ioService) : m_ControllerData(_ioService)
+SmallPack::SmallPackCommunicationCenter::SmallPackCommunicationCenter(boost::asio::io_service& _ioService) : m_ControllerData(_ioService), m_ServerConnection(_ioService)
 {
 	// Set the initial data
 	// ...
@@ -17,13 +17,20 @@ SmallPack::SmallPackCommunicationCenter::~SmallPackCommunicationCenter()
 {
 }
 
-bool SmallPack::SmallPackCommunicationCenter::Initialize(uint16_t _port)
+bool SmallPack::SmallPackCommunicationCenter::Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort)
 {
 	// Set the current port
-	m_ControllerData.currentPort = _port;
+	m_ControllerData.currentPort = _selfPort;
 
 	// Prepare our socket
 	m_ControllerData.connectionSocket = udp::socket(m_ControllerData.ioService, udp::endpoint(udp::v4(), m_ControllerData.currentPort));
+
+	// Initialize the server connection
+	bool result = m_ServerConnection.Initialize(_serverAddress, _serverPort);
+	if (!result)
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -39,7 +46,12 @@ void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _
 	while ((newPack = CheckForNewMessages(_messagePackList, senderEndpoint)) != nullptr)
 	{
 		// Check if the sender is connected to any of our communication channels
-		// ... TODO
+		SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(senderEndpoint.address(), senderEndpoint.port(), true);
+		if (communicationChannel == nullptr)
+		{
+			// Ignore this message pack, invalid sender
+			continue;
+		}
 
 		// Grab all messages inside this pack
 		std::vector<NetworkMessage> messages = _packer->UnpackMessagePack(newPack);
@@ -65,8 +77,24 @@ void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _
 		// Check for system messages
 		if (currentMessage->messageHeader.messageOperator == SmallPack::Operator::System)
 		{
+			// Get the sender communication channel
+			SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(currentMessage->senderInfo.address, currentMessage->senderInfo.port);
+			if (communicationChannel == nullptr)
+			{
+				// Ignore this message, invalid sender
+				messageVector.erase(messageVector.begin() + i);
+				i--;
+				continue;
+			}
+
 			// Process this message
 			// ...
+				* Preciso ver se o servidor deve ficar dentro dessa classe
+				* Preciso pensar como uma mensagem aqui irá refletir fora, se devemos nos "escrever" para receber mensagens de um certo endereço
+				e como isso funcionaria em caso de pings altos e tem a questão de guardar as mensagens enviadas.
+				* Na questão do servidor precisamos garantir que nossos updates foram entregues então o communication channel precisa permitir
+				reenvio e confirmação de recebimento, logo, talvez eu precise passar todas as mensagens de controle para ele e criar classes
+				separadas para o server e outros clientes.
 
 			// Remove this message from the vector
 			messageVector.erase(messageVector.begin() + i);
@@ -102,4 +130,48 @@ SmallPack::MessagePack* SmallPack::SmallPackCommunicationCenter::CheckForNewMess
 bool SmallPack::SmallPackCommunicationCenter::BroadcastMessageToAllClients(NetworkMessage& _message)
 {
 	return true;
+}
+
+SmallPack::SmallPackCommunicationChannel* SmallPack::SmallPackCommunicationCenter::GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
+{
+	// Check if the sender is the server itself
+	if (m_ServerConnection.IsHost(_senderAddress, _port))
+	{
+		return &m_ServerConnection;
+	}
+
+	// For each communication channel
+	for (int i = 0; i < m_ClientConnections.size(); i++)
+	{
+		// Get the current communication channel
+		SmallPackCommunicationChannel* currentCommunicationChannel = m_ClientConnections[i];
+
+		// Check if the sender is the real owner
+		if (currentCommunicationChannel->IsHost(_senderAddress, _port))
+		{
+			return currentCommunicationChannel;
+		}
+	}
+
+	// We didnt found a valid communication channel, check if we should create one
+	if (_createIfNeed)
+	{
+		// Create a new communication channel for this sender
+		SmallPackCommunicationChannel* newCommunicationChannel = new SmallPackCommunicationChannel(m_ControllerData.ioService);
+
+		// Initialize the new communication channel
+		bool result = newCommunicationChannel->Initialize(_senderAddress.to_string().c_str(), std::to_string(_port).c_str());
+		if (!result)
+		{
+			delete newCommunicationChannel;
+			return nullptr;
+		}
+
+		// Insert into our vector the new created communication channel
+		m_ClientConnections.push_back(newCommunicationChannel);
+
+		return newCommunicationChannel;
+	}
+
+	return nullptr;
 }

@@ -13,7 +13,6 @@
 #include "SmallPackMessages.h"
 
 #include <boost\asio.hpp>
-
 #include <vector>
 
 /////////////
@@ -62,15 +61,16 @@ public:
 public:
 
 	// Initialize the communication controller
-	bool Initialize(uint16_t _port);
+	bool Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort);
 
 	// Do the update for our communication center
 	void Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, float _elapsedTime);
 
-public:
-
 	// Send a message to all connected clients
 	bool BroadcastMessageToAllClients(NetworkMessage& _message);
+
+	// Check if a sender has a communication channel
+	SmallPackCommunicationChannel* GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed = false);
 
 private:
 
@@ -83,14 +83,14 @@ public:
 // VARIABLES //
 private: //////
 
+	// The server communication channel
+	SmallPackCommunicationChannel m_ServerConnection;
+
 	// All the p2p connections
 	std::vector<SmallPackCommunicationChannel*> m_ClientConnections;
 
 	// Our controller data
 	ControllerData m_ControllerData;
-
-	// The receive buffer
-	SmallPackMessagePackReceiveBuffer m_ReceiveBuffer;
 };
 
 // SmallPack
