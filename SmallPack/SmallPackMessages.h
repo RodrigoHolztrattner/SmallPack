@@ -41,7 +41,21 @@ enum class Operator
 
 enum class SystemCommands
 {
-	Ping
+	Ping,
+	DeliveryConfirmation,
+
+};
+
+struct CommandPing
+{
+	// The ping identifier
+	uint32_t pingIdentifier;
+};
+
+struct CommandDeliveryConfirmation
+{
+	// The confirmation identifier
+	uint32_t confirmationIdentifier;
 };
 
 struct MessageData
@@ -52,14 +66,29 @@ struct MessageData
 
 struct MessageHeader
 {
-	// The message flags
+	// The message flags <not used>
 	uint32_t messageFlags;
 
-	// The message operator
+	// The message operator <who owns this message>
 	Operator messageOperator;
 
-	// The message id
+	// The message command <what this message is about (ping, custom message, etc)>
+	uint32_t messageCommand;
+
+	// The message id <internal identification of this message, used only by the CommunicationChannel>
 	uint32_t messageId;
+
+	// Return the ID
+	template <typename Type>
+	Type GetType() { return (Type)messageCommand; }
+
+	// Set the type
+	template <typename Type>
+	void SetType(Type _type) { messageCommand = (uint32_t)_type; }
+
+	// Check if this message is from the given type
+	template <typename Type>
+	bool IsFromType(Type _type) { return (Type)messageCommand == _type; }
 };
 
 struct SenderInfo

@@ -5,14 +5,25 @@
     <ClCompile Include="BaseClass.cpp" />
     <ClCompile Include="SmallPackPacker.cpp" />
     <ClCompile Include="SmallPackMessageComposer.cpp" />
-    <ClCompile Include="SmallPackCommunicationChannel.cpp" />
     <ClCompile Include="SmallPackMessagePackList.cpp" />
     <ClCompile Include="SmallPackMessagePackReceiveBuffer.cpp" />
     <ClCompile Include="SmallPackCommunicationCenter.cpp" />
+    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannel.cpp">
+      <Filter>CommunicationChannel</Filter>
+    </ClCompile>
+    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannelNonReliable.cpp">
+      <Filter>CommunicationChannel</Filter>
+    </ClCompile>
+    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannelReliable.cpp">
+      <Filter>CommunicationChannel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
       <UniqueIdentifier>{eac40f99-50d3-4287-a9e1-05347da2d70c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommunicationChannel">
+      <UniqueIdentifier>{5e654c34-5a55-403e-9bc9-dd9f2b9d0dd7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -21,9 +32,17 @@
     <ClInclude Include="SmallPackPacker.h" />
     <ClInclude Include="SmallPackMessages.h" />
     <ClInclude Include="SmallPackMessageComposer.h" />
-    <ClInclude Include="SmallPackCommunicationChannel.h" />
     <ClInclude Include="SmallPackMessagePackList.h" />
     <ClInclude Include="SmallPackMessagePackReceiveBuffer.h" />
     <ClInclude Include="SmallPackCommunicationCenter.h" />
+    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannel.h">
+      <Filter>CommunicationChannel</Filter>
+    </ClInclude>
+    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannelNonReliable.h">
+      <Filter>CommunicationChannel</Filter>
+    </ClInclude>
+    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannelReliable.h">
+      <Filter>CommunicationChannel</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

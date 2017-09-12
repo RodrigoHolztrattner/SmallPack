@@ -155,8 +155,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseClass.cpp" />
+    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannel.cpp" />
+    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannelNonReliable.cpp" />
+    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannelReliable.cpp" />
     <ClCompile Include="SmallPack.cpp" />
-    <ClCompile Include="SmallPackCommunicationChannel.cpp" />
     <ClCompile Include="SmallPackCommunicationCenter.cpp" />
     <ClCompile Include="SmallPackMessageComposer.cpp" />
     <ClCompile Include="SmallPackMessagePackList.cpp" />
@@ -165,7 +167,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseClass.h" />
-    <ClInclude Include="SmallPackCommunicationChannel.h" />
+    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannel.h" />
+    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannelNonReliable.h" />
+    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannelReliable.h" />
     <ClInclude Include="SmallPackCommunicationCenter.h" />
     <ClInclude Include="SmallPackConfig.h" />
     <ClInclude Include="SmallPackMessageComposer.h" />

@@ -35,7 +35,7 @@ bool SmallPack::SmallPackCommunicationCenter::Initialize(const char* _serverAddr
 	return true;
 }
 
-void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, float _elapsedTime)
+void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime)
 {
 	// Our network message vector
 	std::vector<NetworkMessage> messageVector;
@@ -91,7 +91,7 @@ void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _
 			}
 
 			// Process this message
-			communicationChannel->ProcessSystemMessage(currentMessage);
+			communicationChannel->ProcessSystemMessage(_packer, currentMessage, _totalTime);
 
 			// Remove this message from the vector
 			messageVector.erase(messageVector.begin() + i);
@@ -154,7 +154,7 @@ SmallPack::SmallPackCommunicationChannel* SmallPack::SmallPackCommunicationCente
 	if (_createIfNeed)
 	{
 		// Create a new communication channel for this sender
-		SmallPackCommunicationChannel* newCommunicationChannel = new SmallPackCommunicationChannel(m_ControllerData.ioService);
+		SmallPackCommunicationChannel* newCommunicationChannel = new SmallPackCommunicationChannelNonReliable(m_ControllerData.ioService);
 
 		// Initialize the new communication channel
 		bool result = newCommunicationChannel->Initialize(_senderAddress.to_string().c_str(), std::to_string(_port).c_str());

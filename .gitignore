@@ -16,3 +16,4 @@ SmallPack/Debug/
 *.opendb
 SmallPack/ThirdParty/boost/
 SmallPack/x64/
+*.TMP

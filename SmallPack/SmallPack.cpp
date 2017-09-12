@@ -5,7 +5,9 @@
 #include "SmallPackMessages.h"
 #include "SmallPackPacker.h"
 #include "SmallPackMessageComposer.h"
-#include "SmallPackCommunicationChannel.h"
+#include "CommunicationChannel/SmallPackCommunicationChannel.h"
+#include "CommunicationChannel\SmallPackCommunicationChannelNonReliable.h"
+#include "CommunicationChannel\SmallPackCommunicationChannelReliable.h"
 #include "SmallPackCommunicationCenter.h"
 #include "SmallPackMessagePackList.h"
 
@@ -37,7 +39,7 @@ int main()
 	}
 
 	// Initialize the communication controller so we can accept outside requests from other players
-	result = communcationCenter.Initialize(2234);
+	result = communcationCenter.Initialize("192.168.1.1", "33333", 2234);
 	if (!result)
 	{
 		// Cannot initialize the communication controller
@@ -48,7 +50,7 @@ int main()
 	while (true)
 	{
 		// Do the update for our communication center
-		communcationCenter.Update(&messagePackList,& messagePacker, 0);
+		communcationCenter.Update(&messagePackList,& messagePacker, 0, 0);
 	}
 
     return 0;

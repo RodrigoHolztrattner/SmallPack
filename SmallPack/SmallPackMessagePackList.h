@@ -78,12 +78,19 @@ public:
 		return totalDataUsed;
 	}
 
+	// Return the pack identification
+	uint32_t GetPackIdentification()
+	{
+		return packIdentification;
+	}
+
 	// Copy to bytestream
 	uint32_t CopyToByteStream(unsigned char* _byteStream)
 	{
 		uint32_t position = 0;
 		memcpy(_byteStream, &totalNumberMessages, sizeof(uint32_t)); position += sizeof(uint32_t);
 		memcpy(_byteStream, &totalDataUsed, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(_byteStream, &packIdentification, sizeof(uint32_t)); position += sizeof(uint32_t);
 		memcpy(_byteStream, data, sizeof(unsigned char) * totalDataUsed); position += sizeof(unsigned char) * totalDataUsed;
 
 		return position;
@@ -95,6 +102,7 @@ public:
 		uint32_t position = 0;
 		memcpy(&totalNumberMessages, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
 		memcpy(&totalDataUsed, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(&packIdentification, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
 		memcpy(data, _byteStream, sizeof(unsigned char) * (_totalSize - position)); position += sizeof(unsigned char) * (_totalSize - position);
 	}
 
@@ -108,6 +116,9 @@ protected:
 
 	// The total data used
 	uint32_t totalDataUsed;
+
+	// The pack ID
+	uint32_t packIdentification;
 
 private:
 

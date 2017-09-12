@@ -8,7 +8,9 @@
 //////////////
 #include "SmallPackConfig.h"
 
-#include "SmallPackCommunicationChannel.h"
+#include "CommunicationChannel/SmallPackCommunicationChannel.h"
+#include "CommunicationChannel\SmallPackCommunicationChannelNonReliable.h"
+#include "CommunicationChannel\SmallPackCommunicationChannelReliable.h"
 #include "SmallPackMessagePackReceiveBuffer.h"
 #include "SmallPackMessages.h"
 
@@ -64,7 +66,7 @@ public:
 	bool Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort);
 
 	// Do the update for our communication center
-	void Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, float _elapsedTime);
+	void Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime);
 
 	// Send a message to all connected clients
 	bool BroadcastMessageToAllClients(NetworkMessage& _message);
@@ -84,7 +86,7 @@ public:
 private: //////
 
 	// The server communication channel
-	SmallPackCommunicationChannel m_ServerConnection;
+	SmallPackCommunicationChannelReliable m_ServerConnection;
 
 	// All the p2p connections
 	std::vector<SmallPackCommunicationChannel*> m_ClientConnections;
