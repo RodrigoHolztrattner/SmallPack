@@ -36,6 +36,11 @@ bool SmallPack::SmallPackCommunicationChannel::Initialize(const char* _host, con
 	return true;
 }
 
+void SmallPack::SmallPackCommunicationChannel::ProcessSystemMessage(NetworkMessage* _message)
+{
+
+}
+
 void SmallPack::SmallPackCommunicationChannel::Send(SmallPack::MessagePack* _messagePack)
 {
 	const uint32_t bufferSize = 2048;

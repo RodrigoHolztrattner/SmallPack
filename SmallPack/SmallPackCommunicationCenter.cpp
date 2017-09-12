@@ -46,7 +46,7 @@ void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _
 	while ((newPack = CheckForNewMessages(_messagePackList, senderEndpoint)) != nullptr)
 	{
 		// Check if the sender is connected to any of our communication channels
-		SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(senderEndpoint.address(), senderEndpoint.port(), true);
+		SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(senderEndpoint.address(), senderEndpoint.port(), false); // true
 		if (communicationChannel == nullptr)
 		{
 			// Ignore this message pack, invalid sender
@@ -66,6 +66,9 @@ void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _
 
 		// Append the messages
 		messageVector.insert(std::end(messageVector), std::begin(messages), std::end(messages));
+
+		// Release the message pack
+		_packer->ReleaseMessagePack(newPack);
 	}
 
 	// For each received message
@@ -88,13 +91,7 @@ void SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _
 			}
 
 			// Process this message
-			// ...
-				* Preciso ver se o servidor deve ficar dentro dessa classe
-				* Preciso pensar como uma mensagem aqui irá refletir fora, se devemos nos "escrever" para receber mensagens de um certo endereço
-				e como isso funcionaria em caso de pings altos e tem a questão de guardar as mensagens enviadas.
-				* Na questão do servidor precisamos garantir que nossos updates foram entregues então o communication channel precisa permitir
-				reenvio e confirmação de recebimento, logo, talvez eu precise passar todas as mensagens de controle para ele e criar classes
-				separadas para o server e outros clientes.
+			communicationChannel->ProcessSystemMessage(currentMessage);
 
 			// Remove this message from the vector
 			messageVector.erase(messageVector.begin() + i);

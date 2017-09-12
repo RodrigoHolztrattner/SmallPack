@@ -60,6 +60,9 @@ public:
 	// Initialize this channel
 	bool Initialize(const char* _host, const char* _port);
 
+	// Process a system message
+	void ProcessSystemMessage(NetworkMessage* _message);
+
 	// Send a message to this channel
 	void Send(SmallPack::MessagePack* _messagePack);
 
