@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: SmallPackCommunicationChannel.cpp
+// Filename: SmallPackServerCommunicationChannel.cpp
 ////////////////////////////////////////////////////////////////////////////////
-#include "SmallPackCommunicationChannel.h"
+#include "SmallPackServerCommunicationChannel.h"
 #include <cstdio>
 #include <iostream>
 #include <stdlib.h>     /* atoi */
 
 using namespace boost::asio::ip;
 
-SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(boost::asio::io_service& _ioService) : m_ChannelData(_ioService)
+SmallPack::Server::SmallPackServerCommunicationChannel::SmallPackServerCommunicationChannel(boost::asio::io_service& _ioService) : m_ChannelData(_ioService)
 {
 	// Set the initial data
 	m_PingInfo.ping = PingInfo::InitialPing;
@@ -18,16 +18,16 @@ SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(boost::a
 }
 
 /*
-SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(const SmallPack::SmallPackCommunicationChannel& other)
+SmallPack::SmallPackServerCommunicationChannel::SmallPackServerCommunicationChannel(const SmallPack::SmallPackServerCommunicationChannel& other)
 {
 }
 */
 
-SmallPack::SmallPackCommunicationChannel::~SmallPackCommunicationChannel()
+SmallPack::Server::SmallPackServerCommunicationChannel::~SmallPackServerCommunicationChannel()
 {
 }
 
-bool SmallPack::SmallPackCommunicationChannel::Initialize(const char* _host, const char* _port)
+bool SmallPack::Server::SmallPackServerCommunicationChannel::Initialize(const char* _host, const char* _port)
 {
 	// Resolve the ip version with the given host and port to get our iterator
 	udp::resolver resolver(m_ChannelData.ioService);
@@ -37,20 +37,17 @@ bool SmallPack::SmallPackCommunicationChannel::Initialize(const char* _host, con
 	// Set the channel data
 	m_ChannelData.address.from_string(_host);
 	m_ChannelData.port = atoi(_port);
-
-	// Server config done
-	std::cout << "Server connection config stabilished!" << std::endl;
 	
 	return true;
 }
 
-void SmallPack::SmallPackCommunicationChannel::FrameUpdate(uint32_t _currentTime, float _timeElapsed)
+void SmallPack::Server::SmallPackServerCommunicationChannel::FrameUpdate(uint32_t _currentTime, float _timeElapsed)
 {
 	// Check for ping re-send
 	// ...
 }
 
-void SmallPack::SmallPackCommunicationChannel::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
+void SmallPack::Server::SmallPackServerCommunicationChannel::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
 {
 	// Look for the ping controll message (and if we are expecting a ping message)
 	if (_message->messageHeader.IsFromType(SystemCommands::Ping) && m_PingInfo.expectingPing)
@@ -64,13 +61,13 @@ void SmallPack::SmallPackCommunicationChannel::ProcessSystemMessage(SmallPackPac
 	}
 }
 
-void SmallPack::SmallPackCommunicationChannel::QueueMessage(SmallPack::MessagePack* _messagePack)
+void SmallPack::Server::SmallPackServerCommunicationChannel::QueueMessage(SmallPack::MessagePack* _messagePack)
 {
 	// Insert the message pack into our send queue
 	m_SendQueue.push_back(_messagePack);
 }
 
-void SmallPack::SmallPackCommunicationChannel::SendMessagePack(SmallPack::MessagePack* _messagePack)
+void SmallPack::Server::SmallPackServerCommunicationChannel::SendMessagePack(SmallPack::MessagePack* _messagePack)
 {
 	const uint32_t bufferSize = 2048;
 	unsigned char data[bufferSize];
@@ -85,7 +82,7 @@ void SmallPack::SmallPackCommunicationChannel::SendMessagePack(SmallPack::Messag
 	// não podemos liberar esse pack depois do envio já que ele ainda é armazenado para confirmacao
 }
 
-void SmallPack::SmallPackCommunicationChannel::ProcessPingCommand(CommandPing _pingData, uint32_t _currentTime)
+void SmallPack::Server::SmallPackServerCommunicationChannel::ProcessPingCommand(CommandPing _pingData, uint32_t _currentTime)
 {
 	// Check the ping identifier
 	if (m_PingInfo.pingMessageIdentifier == _pingData.pingIdentifier)
@@ -96,7 +93,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingCommand(CommandPing _p
 	}
 }
 
-bool SmallPack::SmallPackCommunicationChannel::IsHost(boost::asio::ip::address _address, uint32_t _port)
+bool SmallPack::Server::SmallPackServerCommunicationChannel::IsHost(boost::asio::ip::address _address, uint32_t _port)
 {
 	if (m_ChannelData.address == _address && m_ChannelData.port == _port)
 	{

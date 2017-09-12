@@ -28,12 +28,9 @@
 SmallPackamespaceBegin(SmallPack)
 
 /*
-	- Enviamos uma mensagem nossa para o servidor, esperamos que ele responda algo
-	- Enquanto a resposta não chega nos guardamos o message pack num vetor de espera
-	- Caso tenhamos enviado (por algum motivo que não se encontra aqui na especificacao) uma mensagem que nao precise de uma resposta, o servidor ainda sim deve enviar um "ok" (ack) e
-	no caso do servidor enviar uma resposta consistente, podemos confirmar o recebimento daquele pack
-
-
+	- Ao receber um ack do server nos também devemos receber a resposta do processamento da mensagem mesmo que ela seja vazia. Isso garante que se o server entregou um ack
+	nós também recebemos a mensagem em si, logo dessa forma nós não precisamos usar um layer a mais do server para o cliente onde o server precisaria receber um ack do 
+	cliente
 
 */
 

@@ -17,6 +17,12 @@
     <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannelReliable.cpp">
       <Filter>CommunicationChannel</Filter>
     </ClCompile>
+    <ClCompile Include="Server\SmallPackServerCommunicationCenter.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Server\SmallPackServerCommunicationChannel.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
@@ -24,6 +30,9 @@
     </Filter>
     <Filter Include="CommunicationChannel">
       <UniqueIdentifier>{5e654c34-5a55-403e-9bc9-dd9f2b9d0dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{aa366e10-95d3-4d59-975b-1c484ec226e1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +52,12 @@
     </ClInclude>
     <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannelReliable.h">
       <Filter>CommunicationChannel</Filter>
+    </ClInclude>
+    <ClInclude Include="Server\SmallPackServerCommunicationCenter.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Server\SmallPackServerCommunicationChannel.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
