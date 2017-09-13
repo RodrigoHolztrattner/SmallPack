@@ -27,16 +27,16 @@ SmallPack::Server::SmallPackServerCommunicationChannel::~SmallPackServerCommunic
 {
 }
 
-bool SmallPack::Server::SmallPackServerCommunicationChannel::Initialize(const char* _host, const char* _port)
+bool SmallPack::Server::SmallPackServerCommunicationChannel::Initialize(boost::asio::ip::address _senderAddress, uint32_t _port)
 {
 	// Resolve the ip version with the given host and port to get our iterator
 	udp::resolver resolver(m_ChannelData.ioService);
-	udp::resolver::query query(udp::v4(), _host, _port);
+	udp::resolver::query query(udp::v4(), _senderAddress.to_string().c_str(), std::to_string(_port).c_str());
 	m_ChannelData.iterator = resolver.resolve(query);
-
+	
 	// Set the channel data
-	m_ChannelData.address.from_string(_host);
-	m_ChannelData.port = atoi(_port);
+	m_ChannelData.address = _senderAddress;
+	m_ChannelData.port = _port;
 	
 	return true;
 }

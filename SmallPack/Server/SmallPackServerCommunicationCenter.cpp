@@ -8,7 +8,7 @@
 
 using namespace boost::asio::ip;
 
-SmallPack::Server::SmallPackServerCommunicationCenter::SmallPackServerCommunicationCenter(boost::asio::io_service& _ioService) : m_ControllerData(_ioService)
+SmallPack::Server::SmallPackServerCommunicationCenter::SmallPackServerCommunicationCenter(boost::asio::io_service& _ioService) : SmallPack::SmallPackCommunicationCenter(_ioService)
 {
 	// Set the initial data
 	// ...
@@ -29,7 +29,7 @@ bool SmallPack::Server::SmallPackServerCommunicationCenter::Initialize(uint16_t 
 	return true;
 }
 
-void SmallPack::Server::SmallPackServerCommunicationCenter::Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime)
+std::vector<SmallPack::NetworkMessage> SmallPack::Server::SmallPackServerCommunicationCenter::Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime)
 {
 	// Our network message vector
 	std::vector<NetworkMessage> messageVector;
@@ -39,88 +39,47 @@ void SmallPack::Server::SmallPackServerCommunicationCenter::Update(SmallPackMess
 	SmallPack::MessagePack* newPack = nullptr;
 	while ((newPack = CheckForNewMessages(_messagePackList, senderEndpoint)) != nullptr)
 	{
-		// Check if the sender is connected to any of our communication channels
-		SmallPackServerCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(senderEndpoint.address(), senderEndpoint.port(), true);
-		if (communicationChannel == nullptr)
-		{
-			// Ignore this message pack, invalid sender
-			continue;
-		}
-
-		// Grab all messages inside this pack
-		std::vector<NetworkMessage> messages = _packer->UnpackMessagePack(newPack);
-		
-		// Set the message sender info for each message
-		for (auto & message : messages)
-		{
-			// Set both the address and the port
-			message.senderInfo.address = senderEndpoint.address();
-			message.senderInfo.port = senderEndpoint.port();
-		}
-
-		// Append the messages
-		messageVector.insert(std::end(messageVector), std::begin(messages), std::end(messages));
-
-		// Release the message pack
-		_packer->ReleaseMessagePack(newPack);
+		// Get all messages from this pack
+		GetMessagesFromPack(_packer, newPack, messageVector, true);
 	}
 
-	// For each received message
-	for (int i=0; i<messageVector.size(); i++)
+	// Check for system messages
+	CheckForSystemMessages(_packer, messageVector, _totalTime, _elapsedTime);
+
+	// For each client communication channel
+	for (auto & clientCommunicationChannel : m_ClientConnections)
 	{
-		// Get the current message
-		NetworkMessage* currentMessage = &messageVector[i];
-
-		// Check for system messages
-		if (currentMessage->messageHeader.messageOperator == SmallPack::Operator::System)
-		{
-			// Get the sender communication channel
-			SmallPackServerCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(currentMessage->senderInfo.address, currentMessage->senderInfo.port);
-			if (communicationChannel == nullptr)
-			{
-				// Ignore this message, invalid sender
-				messageVector.erase(messageVector.begin() + i);
-				i--;
-				continue;
-			}
-
-			// Process this message
-			communicationChannel->ProcessSystemMessage(_packer, currentMessage, _totalTime);
-
-			// Remove this message from the vector
-			messageVector.erase(messageVector.begin() + i);
-			i--;
-		}
+		clientCommunicationChannel->FrameUpdate(_totalTime, _elapsedTime);
 	}
+
+	// Return the message vector
+	return messageVector;
 }
 
-SmallPack::MessagePack* SmallPack::Server::SmallPackServerCommunicationCenter::CheckForNewMessages(SmallPackMessagePackList* _messagePackList, udp::endpoint& _endpoint)
+bool SmallPack::Server::SmallPackServerCommunicationCenter::CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
 {
-	// Check if we have any messages avaliable
-	if (!m_ControllerData.connectionSocket.available())
+	// Get the sender communication channel
+	Server::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_senderAddress, _port, _createIfNeed);
+	if (communicationChannel == nullptr)
 	{
-		return nullptr;
+		return false;
 	}
 
-	// Request a new message pack
-	MessagePack* newMessagePack = _messagePackList->RequestPack();
-
-	// Receive the message pack
-	{
-		const uint32_t bufferSize = 2048;
-		unsigned char data[bufferSize];
-		size_t length = m_ControllerData.connectionSocket.receive_from(boost::asio::buffer(data, bufferSize), _endpoint);
-
-		// Copy into the message pack
-		newMessagePack->CopyFromByteStream(data, length);
-	}
-
-	return newMessagePack;
-}
-
-bool SmallPack::Server::SmallPackServerCommunicationCenter::BroadcastMessageToAllClients(NetworkMessage& _message)
-{
 	return true;
+}
+
+void SmallPack::Server::SmallPackServerCommunicationCenter::SendSystemMessageToCommunicationChannel(SmallPackPacker* _packer, NetworkMessage* _systemMessage, uint32_t _totalTime, float _elapsedTime)
+{
+	// Get the sender communication channel
+	Server::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_systemMessage->senderInfo.address, _systemMessage->senderInfo.port);
+	if (communicationChannel == nullptr)
+	{
+		// Ignore this message, invalid sender
+		return;
+	}
+
+	// Process this message
+	communicationChannel->ProcessSystemMessage(_packer, _systemMessage, _totalTime);
 }
 
 SmallPack::Server::SmallPackServerCommunicationChannel* SmallPack::Server::SmallPackServerCommunicationCenter::GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
@@ -148,7 +107,7 @@ SmallPack::Server::SmallPackServerCommunicationChannel* SmallPack::Server::Small
 		SmallPackServerCommunicationChannel* newCommunicationChannel = new SmallPackServerCommunicationChannel(m_ControllerData.ioService);
 
 		// Initialize the new communication channel
-		bool result = newCommunicationChannel->Initialize(_senderAddress.to_string().c_str(), std::to_string(_port).c_str());
+		bool result = newCommunicationChannel->Initialize(_senderAddress, _port);
 		if (!result)
 		{
 			delete newCommunicationChannel;

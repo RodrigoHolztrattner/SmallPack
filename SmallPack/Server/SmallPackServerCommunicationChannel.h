@@ -87,7 +87,7 @@ public:
 public:
 
 	// Initialize this channel
-	bool Initialize(const char* _host, const char* _port);
+	bool Initialize(boost::asio::ip::address _senderAddress, uint32_t _port);
 
 	// Do the frame update for this communication channel
 	void FrameUpdate(uint32_t _currentTime, float _timeElapsed);
@@ -132,6 +132,9 @@ private:
 	// The channel ID
 	uint32_t m_ChannelIdentifier;
 };
+
+// Short type
+typedef SmallPackServerCommunicationChannel SmallPackCommunicationChannel;
 
 // Server
 SmallPackNamespaceEnd(Server)

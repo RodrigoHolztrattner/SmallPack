@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: SmallPackCommunicationChannelNonReliable.h
+// Filename: SmallPackClientCommunicationChannelNonReliable.h
 ////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -7,7 +7,7 @@
 // INCLUDES //
 //////////////
 #include "../SmallPackConfig.h"
-#include "SmallPackCommunicationChannel.h"
+#include "SmallPackClientCommunicationChannel.h"
 
 #include <boost\asio.hpp>
 #include <ctime>
@@ -27,16 +27,19 @@
 // SmallPack
 SmallPackamespaceBegin(SmallPack)
 
+// Client
+SmallPackamespaceBegin(Client)
+
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: SmallPackCommunicationChannelNonReliable
+// Class name: SmallPackClientCommunicationChannelNonReliable
 ////////////////////////////////////////////////////////////////////////////////
-class SmallPackCommunicationChannelNonReliable : public SmallPackCommunicationChannel
+class SmallPackClientCommunicationChannelNonReliable : public SmallPackClientCommunicationChannel
 {
 
 public:
-	SmallPackCommunicationChannelNonReliable(boost::asio::io_service& _ioService);
-	//SmallPackCommunicationChannelNonReliable(const SmallPackCommunicationChannelNonReliable&);
-	~SmallPackCommunicationChannelNonReliable();
+	SmallPackClientCommunicationChannelNonReliable(boost::asio::io_service& _ioService);
+	//SmallPackClientCommunicationChannelNonReliable(const SmallPackClientCommunicationChannelNonReliable&);
+	~SmallPackClientCommunicationChannelNonReliable();
 
 public:
 
@@ -56,6 +59,12 @@ protected:
 protected: ////
 
 };
+
+// Short type
+typedef SmallPackClientCommunicationChannelNonReliable SmallPackCommunicationChannelNonReliable;
+
+// Client
+SmallPackNamespaceEnd(Client)
 
 // SmallPack
 SmallPackNamespaceEnd(SmallPack)

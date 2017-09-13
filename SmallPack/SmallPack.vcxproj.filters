@@ -7,32 +7,35 @@
     <ClCompile Include="SmallPackMessageComposer.cpp" />
     <ClCompile Include="SmallPackMessagePackList.cpp" />
     <ClCompile Include="SmallPackMessagePackReceiveBuffer.cpp" />
-    <ClCompile Include="SmallPackCommunicationCenter.cpp" />
-    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannel.cpp">
-      <Filter>CommunicationChannel</Filter>
-    </ClCompile>
-    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannelNonReliable.cpp">
-      <Filter>CommunicationChannel</Filter>
-    </ClCompile>
-    <ClCompile Include="CommunicationChannel\SmallPackCommunicationChannelReliable.cpp">
-      <Filter>CommunicationChannel</Filter>
-    </ClCompile>
     <ClCompile Include="Server\SmallPackServerCommunicationCenter.cpp">
       <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="Server\SmallPackServerCommunicationChannel.cpp">
       <Filter>Server</Filter>
     </ClCompile>
+    <ClCompile Include="Client\SmallPackClientCommunicationChannel.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\SmallPackClientCommunicationChannelNonReliable.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\SmallPackClientCommunicationChannelReliable.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\SmallPackClientCommunicationCenter.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="SmallPackCommunicationCenter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
       <UniqueIdentifier>{eac40f99-50d3-4287-a9e1-05347da2d70c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CommunicationChannel">
-      <UniqueIdentifier>{5e654c34-5a55-403e-9bc9-dd9f2b9d0dd7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Server">
       <UniqueIdentifier>{aa366e10-95d3-4d59-975b-1c484ec226e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client">
+      <UniqueIdentifier>{9f97a49e-e05b-4079-99ef-2a5d0a1ef817}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,21 +46,24 @@
     <ClInclude Include="SmallPackMessageComposer.h" />
     <ClInclude Include="SmallPackMessagePackList.h" />
     <ClInclude Include="SmallPackMessagePackReceiveBuffer.h" />
-    <ClInclude Include="SmallPackCommunicationCenter.h" />
-    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannel.h">
-      <Filter>CommunicationChannel</Filter>
-    </ClInclude>
-    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannelNonReliable.h">
-      <Filter>CommunicationChannel</Filter>
-    </ClInclude>
-    <ClInclude Include="CommunicationChannel\SmallPackCommunicationChannelReliable.h">
-      <Filter>CommunicationChannel</Filter>
-    </ClInclude>
     <ClInclude Include="Server\SmallPackServerCommunicationCenter.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="Server\SmallPackServerCommunicationChannel.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="Client\SmallPackClientCommunicationChannel.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\SmallPackClientCommunicationChannelNonReliable.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\SmallPackClientCommunicationChannelReliable.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\SmallPackClientCommunicationCenter.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="SmallPackCommunicationCenter.h" />
   </ItemGroup>
 </Project>

@@ -88,10 +88,10 @@ public:
 	uint32_t CopyToByteStream(unsigned char* _byteStream)
 	{
 		uint32_t position = 0;
-		memcpy(_byteStream, &totalNumberMessages, sizeof(uint32_t)); position += sizeof(uint32_t);
-		memcpy(_byteStream, &totalDataUsed, sizeof(uint32_t)); position += sizeof(uint32_t);
-		memcpy(_byteStream, &packIdentification, sizeof(uint32_t)); position += sizeof(uint32_t);
-		memcpy(_byteStream, data, sizeof(unsigned char) * totalDataUsed); position += sizeof(unsigned char) * totalDataUsed;
+		memcpy(&_byteStream[position], &totalNumberMessages, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(&_byteStream[position], &totalDataUsed, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(&_byteStream[position], &packIdentification, sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(&_byteStream[position], data, sizeof(unsigned char) * totalDataUsed); position += sizeof(unsigned char) * totalDataUsed;
 
 		return position;
 	}
@@ -100,10 +100,10 @@ public:
 	void CopyFromByteStream(unsigned char* _byteStream, uint32_t _totalSize)
 	{
 		uint32_t position = 0;
-		memcpy(&totalNumberMessages, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
-		memcpy(&totalDataUsed, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
-		memcpy(&packIdentification, _byteStream, sizeof(uint32_t)); position += sizeof(uint32_t);
-		memcpy(data, _byteStream, sizeof(unsigned char) * (_totalSize - position)); position += sizeof(unsigned char) * (_totalSize - position);
+		memcpy(&totalNumberMessages, &_byteStream[position], sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(&totalDataUsed, &_byteStream[position], sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(&packIdentification, &_byteStream[position], sizeof(uint32_t)); position += sizeof(uint32_t);
+		memcpy(data, &_byteStream[position], sizeof(unsigned char) * (_totalSize - position)); position += sizeof(unsigned char) * (_totalSize - position);
 	}
 
 protected:

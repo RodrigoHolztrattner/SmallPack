@@ -8,9 +8,9 @@
 //////////////
 #include "SmallPackConfig.h"
 
-#include "CommunicationChannel/SmallPackCommunicationChannel.h"
-#include "CommunicationChannel\SmallPackCommunicationChannelNonReliable.h"
-#include "CommunicationChannel\SmallPackCommunicationChannelReliable.h"
+#include "Client\SmallPackClientCommunicationChannel.h"
+#include "Client\SmallPackClientCommunicationChannelNonReliable.h"
+#include "Client\SmallPackClientCommunicationChannelReliable.h"
 #include "SmallPackMessagePackReceiveBuffer.h"
 #include "SmallPackMessages.h"
 
@@ -40,6 +40,7 @@ SmallPackamespaceBegin(SmallPack)
 ////////////////////////////////////////////////////////////////////////////////
 class SmallPackCommunicationCenter
 {
+protected:
 	// The controller data
 	struct ControllerData
 	{
@@ -60,36 +61,29 @@ public:
 	SmallPackCommunicationCenter(boost::asio::io_service& _ioService);
 	~SmallPackCommunicationCenter();
 
-public:
-
-	// Initialize the communication controller
-	bool Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort);
-
 	// Do the update for our communication center
-	void Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime);
+	virtual std::vector<NetworkMessage> Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime) = 0;
 
-	// Send a message to all connected clients
-	bool BroadcastMessageToAllClients(NetworkMessage& _message);
+protected:
 
-	// Check if a sender has a communication channel
-	SmallPackCommunicationChannel* GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed = false);
-
-private:
+	// Return all messaged from a given message pack
+	void GetMessagesFromPack(SmallPackPacker* _packer, SmallPack::MessagePack* _messagePack, std::vector<NetworkMessage>& _messageVector, bool _createNewCommunicationChannels = false);
 
 	// Check for messages
 	SmallPack::MessagePack* CheckForNewMessages(SmallPackMessagePackList* _messagePackList, boost::asio::ip::udp::endpoint& _endpoint);
 
-public:
+	// Verify a message vector for system messages
+	void CheckForSystemMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime);
+	
+	// Check if we have a given communication channel
+	virtual bool CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed) = 0;
+
+	// Send a system message to the given communication channel
+	virtual void SendSystemMessageToCommunicationChannel(SmallPackPacker* _packer, NetworkMessage* _systemMessage, uint32_t _totalTime, float _elapsedTime) = 0;
 
 ///////////////
 // VARIABLES //
-private: //////
-
-	// The server communication channel
-	SmallPackCommunicationChannelReliable m_ServerConnection;
-
-	// All the p2p connections
-	std::vector<SmallPackCommunicationChannel*> m_ClientConnections;
+protected: ////
 
 	// Our controller data
 	ControllerData m_ControllerData;

@@ -1,36 +1,39 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: SmallPackCommunicationChannelReliable.cpp
+// Filename: SmallPackClientCommunicationChannelReliable.cpp
 ////////////////////////////////////////////////////////////////////////////////
-#include "SmallPackCommunicationChannelReliable.h"
-#include "../SmallPackPacker.h"
+#include "SmallPackClientCommunicationChannelReliable.h"
+#include "..\SmallPackPacker.h"
 #include <cstdio>
 
 using namespace boost::asio::ip;
 
-SmallPack::SmallPackCommunicationChannelReliable::SmallPackCommunicationChannelReliable(boost::asio::io_service& _ioService) : SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(_ioService)
+SmallPack::Client::SmallPackClientCommunicationChannelReliable::SmallPackClientCommunicationChannelReliable(boost::asio::io_service& _ioService) : SmallPack::Client::SmallPackClientCommunicationChannel(_ioService)
 {
 }
 
 /*
-SmallPack::SmallPackCommunicationChannelReliable::SmallPackCommunicationChannelReliable(const SmallPack::SmallPackCommunicationChannelReliable& other)
+SmallPack::SmallPackClientCommunicationChannelReliable::SmallPackClientCommunicationChannelReliable(const SmallPack::SmallPackClientCommunicationChannelReliable& other)
 {
 }
 */
 
-SmallPack::SmallPackCommunicationChannelReliable::~SmallPackCommunicationChannelReliable()
+SmallPack::Client::SmallPackClientCommunicationChannelReliable::~SmallPackClientCommunicationChannelReliable()
 {
 }
 
-void SmallPack::SmallPackCommunicationChannelReliable::FrameUpdate(uint32_t _currentTime, float _timeElapsed)
+void SmallPack::Client::SmallPackClientCommunicationChannelReliable::FrameUpdate(uint32_t _currentTime, float _timeElapsed)
 {
 	// Check for expired messages
 	CheckForExpiredMessages(_currentTime);
 
+	// Send all queued messages
+	SendQueuedMessages(_currentTime);
+
 	// Do the base frame update
-	SmallPackCommunicationChannel::FrameUpdate(_currentTime, _timeElapsed);
+	SmallPackClientCommunicationChannel::FrameUpdate(_currentTime, _timeElapsed);
 }
 
-void SmallPack::SmallPackCommunicationChannelReliable::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
+void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
 {
 	// Look for the delivery confirmation message type
 	if (_message->messageHeader.IsFromType(SystemCommands::DeliveryConfirmation))
@@ -44,10 +47,10 @@ void SmallPack::SmallPackCommunicationChannelReliable::ProcessSystemMessage(Smal
 	}
 
 	// Call the base function
-	SmallPackCommunicationChannel::ProcessSystemMessage(_packer, _message, _currentTime);
+	SmallPackClientCommunicationChannel::ProcessSystemMessage(_packer, _message, _currentTime);
 }
 
-void SmallPack::SmallPackCommunicationChannelReliable::SendQueuedMessages(uint32_t _currentTime)
+void SmallPack::Client::SmallPackClientCommunicationChannelReliable::SendQueuedMessages(uint32_t _currentTime)
 {
 	// For each queued message pack
 	for (int i = 0; i < m_SendQueue.size(); i++)
@@ -63,7 +66,7 @@ void SmallPack::SmallPackCommunicationChannelReliable::SendQueuedMessages(uint32
 	m_SendQueue.clear();
 }
 
-void SmallPack::SmallPackCommunicationChannelReliable::ProcessDeliveryConfirmation(SmallPackPacker* _packer, CommandDeliveryConfirmation _deliveryConfirmation)
+void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessDeliveryConfirmation(SmallPackPacker* _packer, CommandDeliveryConfirmation _deliveryConfirmation)
 {
 	// For each message inside our reliable vector
 	for (int i = 0; i < m_ReliableMessageData.size(); i++)
@@ -84,7 +87,7 @@ void SmallPack::SmallPackCommunicationChannelReliable::ProcessDeliveryConfirmati
 	}
 }
 
-void SmallPack::SmallPackCommunicationChannelReliable::CheckForExpiredMessages(uint32_t _currentTime)
+void SmallPack::Client::SmallPackClientCommunicationChannelReliable::CheckForExpiredMessages(uint32_t _currentTime)
 {
 	// Define the delay we can afford using the ping data
 	uint32_t affordableDelay = m_PingInfo.ping * 2 /* ping-pong */ + m_PingInfo.ping * 0.4 /* extra margin */;
@@ -99,7 +102,7 @@ void SmallPack::SmallPackCommunicationChannelReliable::CheckForExpiredMessages(u
 		if (_currentTime - reliableData.timeSent >= affordableDelay)
 		{
 			// Re-send this message
-			SendMessagePack(reliableData.messagePack);
+			//SendMessagePack(reliableData.messagePack);
 
 			// Set the new sent time
 			reliableData.timeSent = _currentTime;

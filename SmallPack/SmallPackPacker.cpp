@@ -2,6 +2,7 @@
 // Filename: SmallPackPacker.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "SmallPackPacker.h"
+#include <iostream>
 
 SmallPack::SmallPackPacker::SmallPackPacker(SmallPackMessagePackList& _messagePackList) : m_MessagePackList(_messagePackList)
 {
@@ -102,7 +103,11 @@ std::vector<SmallPack::NetworkMessage> SmallPack::SmallPackPacker::UnpackMessage
 		NetworkMessage newMessage;
 
 		// Request data for the message
-		RequestReservedMessageData(&newMessage.messageData, MessagePackMaxData);
+		if (!RequestReservedMessageData(&newMessage.messageData, MessagePackMaxData))
+		{
+			std::cout << "Cant request more reserved message data" << std::endl;
+			return unpackedMessages;
+		}
 
 		// Deserialize the message
 		newMessage.Deserialize(_pack->GetData(), currentDataLocation);

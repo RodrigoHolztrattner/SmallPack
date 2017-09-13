@@ -7,7 +7,7 @@
 // INCLUDES //
 //////////////
 #include "../SmallPackConfig.h"
-
+#include "../SmallPackCommunicationCenter.h"
 #include "../SmallPackMessagePackReceiveBuffer.h"
 #include "../SmallPackMessages.h"
 #include "SmallPackServerCommunicationChannel.h"
@@ -39,7 +39,7 @@ SmallPackamespaceBegin(Server)
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: SmallPackServerCommunicationCenter
 ////////////////////////////////////////////////////////////////////////////////
-class SmallPackServerCommunicationCenter
+class SmallPackServerCommunicationCenter : SmallPack::SmallPackCommunicationCenter
 {
 	// The controller data
 	struct ControllerData
@@ -66,19 +66,19 @@ public:
 	// Initialize the communication controller
 	bool Initialize(uint16_t _selfPort);
 
-	// Do the update for our communication center
-	void Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime);
-
-	// Send a message to all connected clients
-	bool BroadcastMessageToAllClients(NetworkMessage& _message);
-
 	// Check if a sender has a communication channel
 	SmallPackServerCommunicationChannel* GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed = false);
 
-private:
+	// Do the update for our communication center
+	virtual std::vector<NetworkMessage> Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime);
 
-	// Check for messages
-	SmallPack::MessagePack* CheckForNewMessages(SmallPackMessagePackList* _messagePackList, boost::asio::ip::udp::endpoint& _endpoint);
+protected:
+
+	// Check if we have a given communication channel
+	virtual bool CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed);
+
+	// Send a system message to the given communication channel
+	virtual void SendSystemMessageToCommunicationChannel(SmallPackPacker* _packer, NetworkMessage* _systemMessage, uint32_t _totalTime, float _elapsedTime);
 
 ///////////////
 // VARIABLES //
@@ -86,10 +86,10 @@ private: //////
 
 	// All the client connections
 	std::vector<SmallPackServerCommunicationChannel*> m_ClientConnections;
-
-	// Our controller data
-	ControllerData m_ControllerData;
 };
+
+// Short type
+typedef SmallPackServerCommunicationCenter SmallPackCommunicationCenter;
 
 // Server
 SmallPackNamespaceEnd(Server)

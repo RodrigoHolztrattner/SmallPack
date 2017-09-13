@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: SmallPackCommunicationChannelReliable.h
+// Filename: SmallPackClientCommunicationChannelReliable.h
 ////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -7,7 +7,7 @@
 // INCLUDES //
 //////////////
 #include "../SmallPackConfig.h"
-#include "SmallPackCommunicationChannel.h"
+#include "SmallPackClientCommunicationChannel.h"
 
 #include <boost\asio.hpp>
 #include <ctime>
@@ -27,6 +27,12 @@
 // SmallPack
 SmallPackamespaceBegin(SmallPack)
 
+// We know the SmallPackPacker class
+class SmallPackPacker;
+
+// Client
+SmallPackamespaceBegin(Client)
+
 /*
 	- Ao receber um ack do server nos também devemos receber a resposta do processamento da mensagem mesmo que ela seja vazia. Isso garante que se o server entregou um ack
 	nós também recebemos a mensagem em si, logo dessa forma nós não precisamos usar um layer a mais do server para o cliente onde o server precisaria receber um ack do 
@@ -34,13 +40,10 @@ SmallPackamespaceBegin(SmallPack)
 
 */
 
-// We know the SmallPackPacker class
-class SmallPackPacker;
-
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: SmallPackCommunicationChannelReliable
+// Class name: SmallPackClientCommunicationChannelReliable
 ////////////////////////////////////////////////////////////////////////////////
-class SmallPackCommunicationChannelReliable : public SmallPackCommunicationChannel
+class SmallPackClientCommunicationChannelReliable : public SmallPackClientCommunicationChannel
 {
 	// The reliable data structure we will use to hold the messages
 	struct ReliableData
@@ -56,9 +59,9 @@ class SmallPackCommunicationChannelReliable : public SmallPackCommunicationChann
 	};
 
 public:
-	SmallPackCommunicationChannelReliable(boost::asio::io_service& _ioService);
-	//SmallPackCommunicationChannelReliable(const SmallPackCommunicationChannelReliable&);
-	~SmallPackCommunicationChannelReliable();
+	SmallPackClientCommunicationChannelReliable(boost::asio::io_service& _ioService);
+	//SmallPackClientCommunicationChannelReliable(const SmallPackClientCommunicationChannelReliable&);
+	~SmallPackClientCommunicationChannelReliable();
 
 	// Do the frame update for this communication channel
 	virtual void FrameUpdate(uint32_t _currentTime, float _timeElapsed);
@@ -86,6 +89,12 @@ protected: ////
 	// The reliable data
 	std::vector<ReliableData> m_ReliableMessageData;
 };
+
+// Short type
+typedef SmallPackClientCommunicationChannelReliable SmallPackCommunicationChannelReliable;
+
+// Client
+SmallPackNamespaceEnd(Client)
 
 // SmallPack
 SmallPackNamespaceEnd(SmallPack)

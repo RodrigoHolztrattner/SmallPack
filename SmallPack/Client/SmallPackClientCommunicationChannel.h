@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: SmallPackCommunicationChannel.h
+// Filename: SmallPackClientCommunicationChannel.h
 ////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -28,10 +28,13 @@
 // SmallPack
 SmallPackamespaceBegin(SmallPack)
 
+// Client
+SmallPackamespaceBegin(Client)
+
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: SmallPackCommunicationChannel
+// Class name: SmallPackClientCommunicationChannel
 ////////////////////////////////////////////////////////////////////////////////
-class SmallPackCommunicationChannel
+class SmallPackClientCommunicationChannel
 {
 
 	// The channel data
@@ -48,7 +51,7 @@ class SmallPackCommunicationChannel
 
 		// Our socket and iterator
 		boost::asio::ip::udp::socket socket;
-		boost::asio::ip::udp::resolver::iterator iterator;
+		boost::asio::ip::udp::endpoint endpoint;
 
 		// The channel address
 		boost::asio::ip::address address;
@@ -77,9 +80,9 @@ class SmallPackCommunicationChannel
 	};
 
 public:
-	SmallPackCommunicationChannel(boost::asio::io_service& _ioService);
-	//SmallPackCommunicationChannel(const SmallPackCommunicationChannel&);
-	~SmallPackCommunicationChannel();
+	SmallPackClientCommunicationChannel(boost::asio::io_service& _ioService);
+	//SmallPackClientCommunicationChannel(const SmallPackClientCommunicationChannel&);
+	~SmallPackClientCommunicationChannel();
 
 public:
 
@@ -129,6 +132,12 @@ private:
 	// The channel ID
 	uint32_t m_ChannelIdentifier;
 };
+
+// Short type
+typedef SmallPackClientCommunicationChannel SmallPackCommunicationChannel;
+
+// Client
+SmallPackNamespaceEnd(Client)
 
 // SmallPack
 SmallPackNamespaceEnd(SmallPack)
