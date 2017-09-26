@@ -29,6 +29,12 @@ bool SmallPack::Server::SmallPackServerCommunicationCenter::Initialize(uint16_t 
 	// Log
 	std::cout << "Listenning on port: " << _selfPort << std::endl;
 
+	//
+	//
+	//
+
+	CreateClientCommunicationChannel(boost::asio::ip::address::from_string("127.0.0.1"), 22222, 1, 22223);
+
 	return true;
 }
 
@@ -61,7 +67,7 @@ std::vector<SmallPack::NetworkMessage> SmallPack::Server::SmallPackServerCommuni
 	while ((newPack = CheckForNewMessages(_messagePackList, senderEndpoint)) != nullptr)
 	{
 		// Get all messages from this pack
-		GetMessagesFromPack(_packer, newPack, senderEndpoint, messageVector, false);
+		GetMessagesFromPack(_packer, newPack, senderEndpoint, messageVector, true);
 	}
 
 	// Check for system messages

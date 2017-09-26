@@ -155,7 +155,7 @@ void SmallPack::SmallPackCommunicationChannel::SetAnswerPort(uint32_t _port)
 {
 	// Set the answer port
 	m_AnswerPort = _port;
-	nao ta chamando aqui no cliente 
+
 	// Create the answer endpoint
 	udp::resolver resolver(m_ChannelData.ioService);
 	udp::resolver::query query(udp::v4(), m_ChannelData.address.to_string().c_str(), std::to_string(_port).c_str());

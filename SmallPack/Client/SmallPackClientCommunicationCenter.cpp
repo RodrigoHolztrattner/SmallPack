@@ -36,6 +36,10 @@ bool SmallPack::Client::SmallPackClientCommunicationCenter::Initialize(const cha
 		return false;
 	}
 
+	// Set the server answer port
+	m_ServerConnection.SetAnswerPort(atoi(_serverPort)); problema é que ele ta recebendo a mensagem do server por uma certa porta 
+		e ele compara com 22222
+
 	return true;
 }
 

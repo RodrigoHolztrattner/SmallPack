@@ -38,9 +38,9 @@ bool SmallPack::Client::SmallPackClientCommunicationChannel::Initialize(const ch
 	udp::resolver::query query(udp::v4(), _host, _port);
 	m_ChannelData.endpoint = *resolver.resolve(query);
 	m_ChannelData.socket.open(udp::v4());
-
+	
 	// Set the channel data
-	m_ChannelData.address.from_string(_host);
+	m_ChannelData.address = boost::asio::ip::address::from_string(_host);;
 	m_ChannelData.port = atoi(_port);
 
 	// Server config done
