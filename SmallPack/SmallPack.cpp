@@ -81,7 +81,7 @@ int main()
 		// Compose a dummy message
 		SmallPack::NetworkMessage newMessage;
 		int dummyData = 5;
-		messageComposer.Compose(&messagePacker, SmallPack::Operator::System, 0, 0, dummyData, newMessage);
+		messageComposer.Compose(&messagePacker, SmallPack::Operator::System, 0, 0, 22223, 1, dummyData, newMessage);
 
 		// Queue the message to be sent
 		communcationCenter.GetServerCommunicationChannel()->QueueMessage(&newMessage);

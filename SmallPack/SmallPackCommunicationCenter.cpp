@@ -19,15 +19,25 @@ SmallPack::SmallPackCommunicationCenter::~SmallPackCommunicationCenter()
 
 void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacker* _packer, SmallPack::MessagePack* _messagePack, udp::endpoint& _senderEndpoint, std::vector<NetworkMessage>& _messageVector, bool _createNewCommunicationChannels)
 {
+	// Grab all messages inside this pack
+	std::vector<NetworkMessage> messages = _packer->UnpackMessagePack(_messagePack);
+
+	// Check if we have at last one message
+	if (!messages.size())
+	{
+		// Ignore this message pack!
+		return;
+	}
+
+	// Get the answer port from the first message
+	uint32_t answerPort = messages[0].messageHeader.answerPort;
+	
 	// Check if the sender is connected to any of our communication channels
-	if (!CommunicationChannelExists(_senderEndpoint.address(), _senderEndpoint.port(), _createNewCommunicationChannels))
+	if (!CommunicationChannelExists(_senderEndpoint.address(), _senderEndpoint.port(), answerPort, _createNewCommunicationChannels))
 	{
 		// Ignore this message pack, invalid sender!
 		return;
 	}
-
-	// Grab all messages inside this pack
-	std::vector<NetworkMessage> messages = _packer->UnpackMessagePack(_messagePack);
 
 	// Set the message sender info for each message
 	for (auto & message : messages)

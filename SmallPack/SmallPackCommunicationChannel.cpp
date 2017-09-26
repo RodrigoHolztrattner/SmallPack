@@ -19,6 +19,7 @@ SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(boost::a
 	m_PingInfo.lastPingTime = 0;
 	m_PingInfo.pingExpectedIdentifier = 0;
 	m_MessagePackSendList = nullptr;
+	m_AuthenticationToken = 0;
 }
 
 /*
@@ -98,10 +99,10 @@ void SmallPack::SmallPackCommunicationChannel::QueueMessage(SmallPack::NetworkMe
 	m_SendQueue.push_back(_message);
 }
 
-void SmallPack::SmallPackCommunicationChannel::CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime)
+void SmallPack::SmallPackCommunicationChannel::CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _originPort, uint32_t _authToken, uint32_t _currentTime)
 {
 	// Process the ping functionality
-	ProcessPingFunctionality(_packer, _composer, _currentTime);
+	ProcessPingFunctionality(_packer, _composer, _originPort, _authToken, _currentTime);
 
 	// For each queued message pack
 	for (int i = 0; i < m_SendQueue.size(); i++)
@@ -145,6 +146,22 @@ void SmallPack::SmallPackCommunicationChannel::RequestPing()
 	m_PingInfo.receivedRequestedPing = true;
 }
 
+void SmallPack::SmallPackCommunicationChannel::SetAuthenticationToken(uint32_t _token)
+{
+	m_AuthenticationToken = _token;
+}
+
+void SmallPack::SmallPackCommunicationChannel::SetAnswerPort(uint32_t _port)
+{
+	// Set the answer port
+	m_AnswerPort = _port;
+	nao ta chamando aqui no cliente 
+	// Create the answer endpoint
+	udp::resolver resolver(m_ChannelData.ioService);
+	udp::resolver::query query(udp::v4(), m_ChannelData.address.to_string().c_str(), std::to_string(_port).c_str());
+	m_ChannelData.answerEndpoint = *resolver.resolve(query);
+}
+
 void SmallPack::SmallPackCommunicationChannel::SendMessagePack(SmallPack::MessagePack* _messagePack)
 {
 	const uint32_t bufferSize = 2048;
@@ -154,13 +171,13 @@ void SmallPack::SmallPackCommunicationChannel::SendMessagePack(SmallPack::Messag
 	uint32_t length = _messagePack->CopyToByteStream(data);
 
 	// Send the message pack through this channel
-	m_ChannelData.socket.send_to(boost::asio::buffer(data, length), m_ChannelData.endpoint);
+	m_ChannelData.socket.send_to(boost::asio::buffer(data, length), m_ChannelData.answerEndpoint);
 
 	// TODO: Precido tomar cuidado pois devo deixar o pack num queue de envio MAS lembrar que caso estejamos usando o reliable channel
 	// não podemos liberar esse pack depois do envio já que ele ainda é armazenado para confirmacao
 }
 
-void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime)
+void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _originPort, uint32_t _authToken, uint32_t _currentTime)
 {
 	// Check if we have at last one message inside our send queue
 	if (!m_SendQueue.size())
@@ -170,7 +187,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		{
 			// Prepare a ping answer
 			SmallPack::NetworkMessage newMessage; int dummyData = 0;
-			_composer->Compose(_packer, SmallPack::Operator::System, 0, 0, dummyData, newMessage);
+			_composer->Compose(_packer, SmallPack::Operator::System, 0, 0, _originPort, _authToken, dummyData, newMessage);
 			newMessage.messageHeader.messageFlags = SetFlag(newMessage.messageHeader.messageFlags, PingCommandType::Answer);
 			PackMessage(newMessage, _packer);
 

@@ -82,7 +82,7 @@ protected:
 	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime) = 0;
 	
 	// Check if we have a given communication channel
-	virtual bool CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed) = 0;
+	virtual bool CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort, bool _createIfNeed) = 0;
 
 	// Send a system message to the given communication channel
 	virtual void SendSystemMessageToCommunicationChannel(SmallPackPacker* _packer, NetworkMessage* _systemMessage, uint32_t _totalTime, float _elapsedTime) = 0;

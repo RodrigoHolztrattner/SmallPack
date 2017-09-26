@@ -83,6 +83,12 @@ struct MessageHeader
 	// The message id <internal identification of this message, used only by the CommunicationChannel>
 	uint32_t messageId;
 
+	// The answer port
+	uint32_t answerPort;
+
+	// The authentication token <0 in case of server>
+	uint32_t authToken;
+
 	// Return the ID
 	template <typename Type>
 	Type GetType() { return (Type)messageCommand; }

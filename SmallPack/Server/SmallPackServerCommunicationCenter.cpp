@@ -32,6 +32,24 @@ bool SmallPack::Server::SmallPackServerCommunicationCenter::Initialize(uint16_t 
 	return true;
 }
 
+bool SmallPack::Server::SmallPackServerCommunicationCenter::CreateClientCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _authToken, uint32_t _answerPort)
+{
+	// Get the sender communication channel
+	Server::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_senderAddress, _port, true);
+	if (communicationChannel == nullptr)
+	{
+		return false;
+	}
+
+	// Set the channel authentication token
+	communicationChannel->SetAuthenticationToken(_authToken);
+
+	// Set the answer port
+	communicationChannel->SetAnswerPort(_answerPort);
+
+	return true;
+}
+
 std::vector<SmallPack::NetworkMessage> SmallPack::Server::SmallPackServerCommunicationCenter::Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime)
 {
 	// Our network message vector
@@ -43,7 +61,7 @@ std::vector<SmallPack::NetworkMessage> SmallPack::Server::SmallPackServerCommuni
 	while ((newPack = CheckForNewMessages(_messagePackList, senderEndpoint)) != nullptr)
 	{
 		// Get all messages from this pack
-		GetMessagesFromPack(_packer, newPack, senderEndpoint, messageVector, true);
+		GetMessagesFromPack(_packer, newPack, senderEndpoint, messageVector, false);
 	}
 
 	// Check for system messages
@@ -88,14 +106,14 @@ void SmallPack::Server::SmallPackServerCommunicationCenter::CommitMessages(Small
 	for (auto & clientCommunicationChannel : m_ClientConnections)
 	{
 		// Commit all queued messages for this channel
-		clientCommunicationChannel->CommitQueueMessage(_packer, _composer, _totalTime);
+		clientCommunicationChannel->CommitQueueMessage(_packer, _composer, m_ControllerData.currentPort, 1, _totalTime);
 	}
 }
 
-bool SmallPack::Server::SmallPackServerCommunicationCenter::CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
+bool SmallPack::Server::SmallPackServerCommunicationCenter::CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort, bool _createIfNeed)
 {
 	// Get the sender communication channel
-	Server::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_senderAddress, _port, _createIfNeed);
+	Server::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_senderAddress, _port, _answerPort, _createIfNeed);
 	if (communicationChannel == nullptr)
 	{
 		return false;
@@ -118,7 +136,7 @@ void SmallPack::Server::SmallPackServerCommunicationCenter::SendSystemMessageToC
 	communicationChannel->ProcessSystemMessage(_packer, _systemMessage, _totalTime);
 }
 
-SmallPack::Server::SmallPackServerCommunicationChannel* SmallPack::Server::SmallPackServerCommunicationCenter::GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
+SmallPack::Server::SmallPackServerCommunicationChannel* SmallPack::Server::SmallPackServerCommunicationCenter::GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort, bool _createIfNeed)
 {
 	// For each communication channel
 	for (int i = 0; i < m_ClientConnections.size(); i++)
@@ -152,6 +170,9 @@ SmallPack::Server::SmallPackServerCommunicationChannel* SmallPack::Server::Small
 
 		// Insert into our vector the new created communication channel
 		m_ClientConnections.push_back(newCommunicationChannel);
+
+		// Set the answer port
+		newCommunicationChannel->SetAnswerPort(_answerPort);
 
 		// Log
 		std::cout << "Creating new connection with address: " << _senderAddress.to_string() << " at port: " << _port << std::endl;

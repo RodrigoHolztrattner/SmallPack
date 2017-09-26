@@ -96,20 +96,20 @@ void SmallPack::Client::SmallPackClientCommunicationCenter::ProcessPingMessage(S
 void SmallPack::Client::SmallPackClientCommunicationCenter::CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime)
 {
 	// Commit all queued messages for the server
-	m_ServerConnection.CommitQueueMessage(_packer, _composer, _totalTime);
+	m_ServerConnection.CommitQueueMessage(_packer, _composer, m_ControllerData.currentPort, 1, _totalTime);
 
 	// For each client communication channel
 	for (auto & clientCommunicationChannel : m_ClientConnections)
 	{
 		// Commit all queued messages for this channel
-		clientCommunicationChannel->CommitQueueMessage(_packer, _composer, _totalTime);
+		clientCommunicationChannel->CommitQueueMessage(_packer, _composer, m_ControllerData.currentPort, 1, _totalTime);
 	}
 }
 
-bool SmallPack::Client::SmallPackClientCommunicationCenter::CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
+bool SmallPack::Client::SmallPackClientCommunicationCenter::CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort, bool _createIfNeed)
 {
 	// Get the sender communication channel
-	Client::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_senderAddress, _port, _createIfNeed);
+	Client::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_senderAddress, _port, _answerPort, _createIfNeed);
 	if (communicationChannel == nullptr)
 	{
 		return false;
@@ -137,7 +137,7 @@ bool SmallPack::Client::SmallPackClientCommunicationCenter::BroadcastMessageToAl
 	return true;
 }
 
-SmallPack::Client::SmallPackCommunicationChannel* SmallPack::Client::SmallPackClientCommunicationCenter::GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
+SmallPack::Client::SmallPackCommunicationChannel* SmallPack::Client::SmallPackClientCommunicationCenter::GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort, bool _createIfNeed)
 {
 	// Check if the sender is the server itself
 	if (m_ServerConnection.IsHost(_senderAddress, _port))
@@ -174,6 +174,9 @@ SmallPack::Client::SmallPackCommunicationChannel* SmallPack::Client::SmallPackCl
 
 		// Insert into our vector the new created communication channel
 		m_ClientConnections.push_back(newCommunicationChannel);
+
+		// Set the answer port
+		newCommunicationChannel->SetAnswerPort(_answerPort);
 
 		// Log
 		std::cout << "Creating new connection with address: " << _senderAddress.to_string() << " at port: " << _port << std::endl;

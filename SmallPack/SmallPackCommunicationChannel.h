@@ -53,6 +53,7 @@ protected:
 		// Our socket and iterator
 		boost::asio::ip::udp::socket socket;
 		boost::asio::ip::udp::endpoint endpoint;
+		boost::asio::ip::udp::endpoint answerEndpoint;
 		//boost::asio::ip::udp::resolver::iterator iterator;
 
 		// The channel address
@@ -107,13 +108,19 @@ public:
 	void QueueMessage(SmallPack::NetworkMessage* _message);
 	
 	// Commit all queued messages
-	void CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime);
+	void CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _originPort, uint32_t _authToken, uint32_t _currentTime);
 
 	// Verify if the given host is the owner of this channel
 	bool IsHost(boost::asio::ip::address _address, uint32_t _port);
 
 	// Request a ping message for this channel
 	void RequestPing();
+
+	// Set the channel authentication token
+	void SetAuthenticationToken(uint32_t _token);
+
+	// Set the channel answer port
+	void SetAnswerPort(uint32_t _port);
 
 protected:
 
@@ -126,7 +133,7 @@ protected:
 private:
 
 	// Process the ping functionality
-	void ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime);
+	void ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _originPort, uint32_t _authToken, uint32_t _currentTime);
 
 	// Pack a given message and prepare it to be sent
 	void PackMessage(NetworkMessage& _message, SmallPackPacker* _packer);
@@ -148,6 +155,12 @@ private:
 
 	// The channel ID
 	uint32_t m_ChannelIdentifier;
+
+	// The authentication token identifier
+	uint32_t m_AuthenticationToken;
+
+	// The answer port for this channel
+	uint32_t m_AnswerPort;
 
 	// The message pack send queue
 	MessagePack* m_MessagePackSendList;
