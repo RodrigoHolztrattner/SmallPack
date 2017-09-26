@@ -96,6 +96,9 @@ SmallPack::MessagePack* SmallPack::SmallPackCommunicationCenter::CheckForNewMess
 		unsigned char data[bufferSize];
 		size_t length = m_ControllerData.connectionSocket.receive_from(boost::asio::buffer(data, bufferSize), _endpoint);
 
+		// boost::system::error_code ignored_error;
+		// m_ControllerData.connectionSocket.send_to(boost::asio::buffer(data, bufferSize), _endpoint, 0, ignored_error);
+
 		// Copy into the message pack
 		newMessagePack->CopyFromByteStream(data, length);
 	}

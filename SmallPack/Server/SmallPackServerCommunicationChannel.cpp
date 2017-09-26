@@ -39,10 +39,6 @@ bool SmallPack::Server::SmallPackServerCommunicationChannel::Initialize(boost::a
 	m_ChannelData.endpoint = *resolver.resolve(query);
 	m_ChannelData.socket.open(udp::v4());
 
-	a parte de recebimento de mensagem do cliente não esta funcionando
-		OU
-		a parte de envio de mensagem do server não está funcionando
-
 	// Set the channel data
 	m_ChannelData.address = _senderAddress;
 	m_ChannelData.port = _port;
