@@ -17,14 +17,10 @@ SmallPack::SmallPackCommunicationCenter::~SmallPackCommunicationCenter()
 {
 }
 
-void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacker* _packer, SmallPack::MessagePack* _messagePack, std::vector<NetworkMessage>& _messageVector, bool _createNewCommunicationChannels)
+void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacker* _packer, SmallPack::MessagePack* _messagePack, udp::endpoint& _senderEndpoint, std::vector<NetworkMessage>& _messageVector, bool _createNewCommunicationChannels)
 {
-	// While there are new message packs
-	udp::endpoint senderEndpoint;
-	SmallPack::MessagePack* newPack = nullptr;
-
 	// Check if the sender is connected to any of our communication channels
-	if (!CommunicationChannelExists(senderEndpoint.address(), senderEndpoint.port(), _createNewCommunicationChannels))
+	if (!CommunicationChannelExists(_senderEndpoint.address(), _senderEndpoint.port(), _createNewCommunicationChannels))
 	{
 		// Ignore this message pack, invalid sender!
 		return;
@@ -37,15 +33,15 @@ void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacke
 	for (auto & message : messages)
 	{
 		// Set both the address and the port
-		message.senderInfo.address = senderEndpoint.address();
-		message.senderInfo.port = senderEndpoint.port();
+		message.senderInfo.address = _senderEndpoint.address();
+		message.senderInfo.port = _senderEndpoint.port();
 	}
 
 	// Append the messages
 	_messageVector.insert(std::end(_messageVector), std::begin(messages), std::end(messages));
 
 	// Release the message pack
-	_packer->ReleaseMessagePack(newPack);
+	_packer->ReleaseMessagePack(_messagePack);
 }
 
 void SmallPack::SmallPackCommunicationCenter::CheckForSystemMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime)
@@ -55,6 +51,20 @@ void SmallPack::SmallPackCommunicationCenter::CheckForSystemMessages(SmallPackPa
 	{
 		// Get the current message
 		NetworkMessage* currentMessage = &_messageVector[i];
+
+		// Check the ping request
+		if (CheckFlag(currentMessage->messageHeader.messageFlags, PingCommandType::Request))
+		{
+			// Process this ping message
+			ProcessPingMessage(_packer, currentMessage, PingCommandType::Request, _totalTime);
+		}
+
+		// Check the ping answer
+		if (CheckFlag(currentMessage->messageHeader.messageFlags, PingCommandType::Answer))
+		{
+			// Process this ping message
+			ProcessPingMessage(_packer, currentMessage, PingCommandType::Answer, _totalTime);
+		}
 
 		// Check for system messages
 		if (currentMessage->messageHeader.messageOperator == SmallPack::Operator::System)

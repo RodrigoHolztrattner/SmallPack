@@ -30,6 +30,7 @@ SmallPackamespaceBegin(SmallPack)
 class SmallPackMessagePackList;
 class SmallPackPacker;
 class SmallPackMessagePackReceiveBuffer;
+class SmallPackCommunicationChannel;
 
 // The message pack
 struct MessagePack
@@ -46,6 +47,9 @@ private:
 
 	// The SmallPackMessagePackReceiveBuffer is a friend
 	friend SmallPackMessagePackReceiveBuffer;
+
+	// The SmallPackCommunicationChannel is a friend
+	friend SmallPackCommunicationChannel;
 
 public:
 

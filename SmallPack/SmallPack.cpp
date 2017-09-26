@@ -83,12 +83,8 @@ int main()
 		int dummyData = 5;
 		messageComposer.Compose(&messagePacker, SmallPack::Operator::System, 0, 0, dummyData, newMessage);
 
-		// Create the new message pack
-		SmallPack::MessagePack* messagePack = messagePacker.RequestMessagePack();
-		messagePacker.PackMessage(newMessage, messagePack);
-
 		// Queue the message to be sent
-		communcationCenter.GetServerCommunicationChannel()->QueueMessage(messagePack);
+		communcationCenter.GetServerCommunicationChannel()->QueueMessage(&newMessage);
 
 		// Get the current time
 		clock_t currentTime = clock();
@@ -116,10 +112,13 @@ int main()
 				acc = 0;
 
 				// Queue the message to be sent
-				communcationCenter.GetServerCommunicationChannel()->QueueMessage(messagePack);
+				communcationCenter.GetServerCommunicationChannel()->QueueMessage(&newMessage);
 
 				std::cout << "Message sent to the server" << std::endl;
 			}
+
+			// Commit
+			communcationCenter.CommitMessages(&messagePacker, &messageComposer, end - initialTime);
 
 			// Reset the message packer frame
 			messagePacker.ResetFrame();		
@@ -160,6 +159,9 @@ int main()
 
 			// Do the update for our communication center
 			std::vector<SmallPack::NetworkMessage> messages = communcationCenter.Update(&messagePackList, &messagePacker, end - initialTime, elapsed_secs);
+
+			// Commit
+			communcationCenter.CommitMessages(&messagePacker, &messageComposer, end - initialTime);
 
 			// Reset the message packer frame
 			messagePacker.ResetFrame();

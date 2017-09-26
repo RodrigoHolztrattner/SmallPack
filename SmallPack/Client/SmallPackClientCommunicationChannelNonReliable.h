@@ -49,11 +49,6 @@ public:
 	// Process a system message
 	virtual void ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime);
 
-protected:
-
-	// Send all queued messages
-	virtual void SendQueuedMessages(uint32_t _currentTime);
-
 ///////////////
 // VARIABLES //
 protected: ////

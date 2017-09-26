@@ -64,16 +64,22 @@ public:
 	// Do the update for our communication center
 	virtual std::vector<NetworkMessage> Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime) = 0;
 
+	// Commit all messages inside this communication center
+	virtual void CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime) = 0;
+
 protected:
 
 	// Return all messaged from a given message pack
-	void GetMessagesFromPack(SmallPackPacker* _packer, SmallPack::MessagePack* _messagePack, std::vector<NetworkMessage>& _messageVector, bool _createNewCommunicationChannels = false);
+	void GetMessagesFromPack(SmallPackPacker* _packer, SmallPack::MessagePack* _messagePack, boost::asio::ip::udp::endpoint& _senderEndpoint, std::vector<NetworkMessage>& _messageVector, bool _createNewCommunicationChannels = false);
 
 	// Check for messages
 	SmallPack::MessagePack* CheckForNewMessages(SmallPackMessagePackList* _messagePackList, boost::asio::ip::udp::endpoint& _endpoint);
 
 	// Verify a message vector for system messages
 	void CheckForSystemMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime);
+
+	// Process a ping message
+	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime) = 0;
 	
 	// Check if we have a given communication channel
 	virtual bool CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed) = 0;

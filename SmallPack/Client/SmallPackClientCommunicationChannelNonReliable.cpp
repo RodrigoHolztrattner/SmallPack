@@ -32,16 +32,3 @@ void SmallPack::Client::SmallPackClientCommunicationChannelNonReliable::ProcessS
 	// Call the base function
 	SmallPackClientCommunicationChannel::ProcessSystemMessage(_packer, _message, _currentTime);
 }
-
-void SmallPack::Client::SmallPackClientCommunicationChannelNonReliable::SendQueuedMessages(uint32_t _currentTime)
-{
-	// For each queued message pack
-	for (int i = 0; i < m_SendQueue.size(); i++)
-	{
-		// Send this message pack
-		SendMessagePack(m_SendQueue[i]);
-	}
-
-	// Clear the send queue
-	m_SendQueue.clear();
-}

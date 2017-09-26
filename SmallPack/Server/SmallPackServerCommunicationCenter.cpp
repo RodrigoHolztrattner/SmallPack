@@ -26,6 +26,9 @@ bool SmallPack::Server::SmallPackServerCommunicationCenter::Initialize(uint16_t 
 	// Prepare our socket
 	m_ControllerData.connectionSocket = udp::socket(m_ControllerData.ioService, udp::endpoint(udp::v4(), m_ControllerData.currentPort));
 
+	// Log
+	std::cout << "Listenning on port: " << _selfPort << std::endl;
+
 	return true;
 }
 
@@ -40,7 +43,7 @@ std::vector<SmallPack::NetworkMessage> SmallPack::Server::SmallPackServerCommuni
 	while ((newPack = CheckForNewMessages(_messagePackList, senderEndpoint)) != nullptr)
 	{
 		// Get all messages from this pack
-		GetMessagesFromPack(_packer, newPack, messageVector, true);
+		GetMessagesFromPack(_packer, newPack, senderEndpoint, messageVector, true);
 	}
 
 	// Check for system messages
@@ -54,6 +57,39 @@ std::vector<SmallPack::NetworkMessage> SmallPack::Server::SmallPackServerCommuni
 
 	// Return the message vector
 	return messageVector;
+}
+
+void  SmallPack::Server::SmallPackServerCommunicationCenter::ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime)
+{
+	// Get the sender communication channel
+	Server::SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_message->senderInfo.address, _message->senderInfo.port);
+	if (communicationChannel == nullptr)
+	{
+		// Ignore this message, invalid sender
+		return;
+	}
+
+	// Check the ping type
+	if (_type == PingCommandType::Answer)
+	{
+		// Process the ping answer for this channel
+		communicationChannel->ProcessPingAnswer(_packer, _message, _totalTime);
+	}
+	else if (_type == PingCommandType::Request)
+	{
+		// Request a ping message from this channel
+		communicationChannel->RequestPing();
+	}
+}
+
+void SmallPack::Server::SmallPackServerCommunicationCenter::CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime)
+{
+	// For each client communication channel
+	for (auto & clientCommunicationChannel : m_ClientConnections)
+	{
+		// Commit all queued messages for this channel
+		clientCommunicationChannel->CommitQueueMessage(_packer, _composer, _totalTime);
+	}
 }
 
 bool SmallPack::Server::SmallPackServerCommunicationCenter::CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
@@ -116,6 +152,9 @@ SmallPack::Server::SmallPackServerCommunicationChannel* SmallPack::Server::Small
 
 		// Insert into our vector the new created communication channel
 		m_ClientConnections.push_back(newCommunicationChannel);
+
+		// Log
+		std::cout << "Creating new connection with address: " << _senderAddress.to_string() << " at port: " << _port << std::endl;
 
 		return newCommunicationChannel;
 	}

@@ -54,6 +54,7 @@ public:
 		newMessage.messageHeader.messageOperator = _messageOperator;
 		newMessage.messageHeader.messageId = _messageId;
 		newMessage.messageHeader.messageCommand = _messageCommand;
+		newMessage.messageHeader.messageFlags = 0;
 
 		// Request the message data
 		bool result = _packer->RequestReservedMessageData(&newMessage.messageData, sizeof(ObjectType));

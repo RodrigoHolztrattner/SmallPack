@@ -16,6 +16,9 @@
 
 SmallPackamespaceBegin(SmallPack)
 
+inline unsigned int SetFlag(unsigned int _val, unsigned int _flag) { return _val | _flag; }
+inline bool CheckFlag(unsigned int _val, unsigned int _flag) { return (_val & _flag); }
+
 inline unsigned int pow2roundup(unsigned int x)
 {
 	if (x < 0)

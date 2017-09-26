@@ -163,6 +163,7 @@
     <ClCompile Include="Server\SmallPackServerCommunicationChannel.cpp" />
     <ClCompile Include="SmallPack.cpp" />
     <ClCompile Include="SmallPackCommunicationCenter.cpp" />
+    <ClCompile Include="SmallPackCommunicationChannel.cpp" />
     <ClCompile Include="SmallPackMessageComposer.cpp" />
     <ClCompile Include="SmallPackMessagePackList.cpp" />
     <ClCompile Include="SmallPackMessagePackReceiveBuffer.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Server\SmallPackServerCommunicationCenter.h" />
     <ClInclude Include="Server\SmallPackServerCommunicationChannel.h" />
     <ClInclude Include="SmallPackCommunicationCenter.h" />
+    <ClInclude Include="SmallPackCommunicationChannel.h" />
     <ClInclude Include="SmallPackConfig.h" />
     <ClInclude Include="SmallPackMessageComposer.h" />
     <ClInclude Include="SmallPackMessagePackList.h" />

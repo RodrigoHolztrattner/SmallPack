@@ -26,9 +26,6 @@ void SmallPack::Client::SmallPackClientCommunicationChannelReliable::FrameUpdate
 	// Check for expired messages
 	CheckForExpiredMessages(_currentTime);
 
-	// Send all queued messages
-	SendQueuedMessages(_currentTime);
-
 	// Do the base frame update
 	SmallPackClientCommunicationChannel::FrameUpdate(_currentTime, _timeElapsed);
 }
@@ -50,20 +47,10 @@ void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessSyst
 	SmallPackClientCommunicationChannel::ProcessSystemMessage(_packer, _message, _currentTime);
 }
 
-void SmallPack::Client::SmallPackClientCommunicationChannelReliable::SendQueuedMessages(uint32_t _currentTime)
+void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessSentMessagePack(SmallPackPacker* _packer, MessagePack* _messagePack, uint32_t _currentTime)
 {
-	// For each queued message pack
-	for (int i = 0; i < m_SendQueue.size(); i++)
-	{
-		// Send this message pack
-		SendMessagePack(m_SendQueue[i]);
-
-		// Insert the message into our reliable vector
-		m_ReliableMessageData.push_back(ReliableData(m_SendQueue[i], _currentTime));
-	}
-
-	// Clear the send queue
-	m_SendQueue.clear();
+	// Insert the message into our reliable vector
+	m_ReliableMessageData.push_back(ReliableData(_messagePack, _currentTime));
 }
 
 void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessDeliveryConfirmation(SmallPackPacker* _packer, CommandDeliveryConfirmation _deliveryConfirmation)
@@ -102,7 +89,7 @@ void SmallPack::Client::SmallPackClientCommunicationChannelReliable::CheckForExp
 		if (_currentTime - reliableData.timeSent >= affordableDelay)
 		{
 			// Re-send this message
-			//SendMessagePack(reliableData.messagePack);
+			// SendMessagePack(reliableData.messagePack);
 
 			// Set the new sent time
 			reliableData.timeSent = _currentTime;

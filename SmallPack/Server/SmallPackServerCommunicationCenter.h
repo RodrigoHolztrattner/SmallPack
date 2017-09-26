@@ -72,6 +72,9 @@ public:
 	// Do the update for our communication center
 	virtual std::vector<NetworkMessage> Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime);
 
+	// Commit all messages inside this communication center
+	virtual void CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime);
+
 protected:
 
 	// Check if we have a given communication channel
@@ -79,6 +82,9 @@ protected:
 
 	// Send a system message to the given communication channel
 	virtual void SendSystemMessageToCommunicationChannel(SmallPackPacker* _packer, NetworkMessage* _systemMessage, uint32_t _totalTime, float _elapsedTime);
+
+	// Process a ping message
+	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime);
 
 ///////////////
 // VARIABLES //

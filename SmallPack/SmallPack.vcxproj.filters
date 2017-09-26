@@ -26,6 +26,7 @@
       <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="SmallPackCommunicationCenter.cpp" />
+    <ClCompile Include="SmallPackCommunicationChannel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
@@ -65,5 +66,6 @@
       <Filter>Client</Filter>
     </ClInclude>
     <ClInclude Include="SmallPackCommunicationCenter.h" />
+    <ClInclude Include="SmallPackCommunicationChannel.h" />
   </ItemGroup>
 </Project>

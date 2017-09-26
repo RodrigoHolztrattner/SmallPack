@@ -43,13 +43,18 @@ enum class SystemCommands
 {
 	Ping,
 	DeliveryConfirmation,
-
 };
 
 struct CommandPing
 {
 	// The ping identifier
 	uint32_t pingIdentifier;
+};
+
+enum PingCommandType
+{
+	Request			= 1 << 0,
+	Answer			= 1 << 1
 };
 
 struct CommandDeliveryConfirmation

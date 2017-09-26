@@ -71,8 +71,8 @@ public:
 
 protected:
 
-	// Send all queued messages
-	virtual void SendQueuedMessages(uint32_t _currentTime);
+	// Process a sent message pack
+	virtual void ProcessSentMessagePack(SmallPackPacker* _packer, MessagePack* _messagePack, uint32_t _currentTime);
 
 private:
 
