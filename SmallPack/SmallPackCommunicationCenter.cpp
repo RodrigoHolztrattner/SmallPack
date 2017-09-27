@@ -2,8 +2,9 @@
 // Filename: SmallPackCommunicationCenter.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "SmallPackCommunicationCenter.h"
-
 #include "SmallPackPacker.h"
+
+#include <iostream>
 
 using namespace boost::asio::ip;
 
@@ -15,6 +16,34 @@ SmallPack::SmallPackCommunicationCenter::SmallPackCommunicationCenter(boost::asi
 
 SmallPack::SmallPackCommunicationCenter::~SmallPackCommunicationCenter()
 {
+}
+
+std::vector<SmallPack::NetworkMessage> SmallPack::SmallPackCommunicationCenter::Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime)
+{
+	// Our network message vector
+	std::vector<NetworkMessage> messageVector;
+
+	// While there are new message packs
+	udp::endpoint senderEndpoint;
+	SmallPack::MessagePack* newPack = nullptr;
+	while ((newPack = CheckForNewMessages(_messagePackList, senderEndpoint)) != nullptr)
+	{
+		// Get all messages from this pack
+		GetMessagesFromPack(_packer, newPack, senderEndpoint, messageVector, false);
+	}
+
+	// Check for system messages
+	CheckForSystemMessages(_packer, messageVector, _totalTime, _elapsedTime);
+
+	// For each client communication channel
+	for (auto & clientCommunicationChannel : m_ClientConnections)
+	{
+		// Do the frame update for this channel
+		clientCommunicationChannel->FrameUpdate(_totalTime, _elapsedTime);
+	}
+
+	// Return the message vector
+	return messageVector;
 }
 
 void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacker* _packer, SmallPack::MessagePack* _messagePack, udp::endpoint& _senderEndpoint, std::vector<NetworkMessage>& _messageVector, bool _createNewCommunicationChannels)
@@ -32,8 +61,9 @@ void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacke
 	// Get the answer port from the first message
 	uint32_t answerPort = messages[0].messageHeader.answerPort;
 	
-	// Check if the sender is connected to any of our communication channels
-	if (!CommunicationChannelExists(_senderEndpoint.address(), _senderEndpoint.port(), answerPort, _createNewCommunicationChannels))
+	// Get the sender communication channel and check if he is connected to any of our communication channels
+	SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_senderEndpoint.address(), answerPort, _createNewCommunicationChannels);
+	if (communicationChannel == nullptr)
 	{
 		// Ignore this message pack, invalid sender!
 		return;
@@ -44,7 +74,7 @@ void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacke
 	{
 		// Set both the address and the port
 		message.senderInfo.address = _senderEndpoint.address();
-		message.senderInfo.port = _senderEndpoint.port();
+		message.senderInfo.port = answerPort; //  _senderEndpoint.port();
 	}
 
 	// Append the messages
@@ -54,6 +84,39 @@ void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacke
 	_packer->ReleaseMessagePack(_messagePack);
 }
 
+void SmallPack::SmallPackCommunicationCenter::ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime)
+{
+	// Get the sender communication channel
+	SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_message->senderInfo.address, _message->senderInfo.port, false);
+	if (communicationChannel == nullptr)
+	{
+		// Ignore this message, invalid sender
+		return;
+	}
+
+	// Check the ping type
+	if (_type == PingCommandType::Answer)
+	{
+		// Process the ping answer for this channel
+		communicationChannel->ProcessPingAnswer(_packer, _message, _totalTime);
+	}
+	else if (_type == PingCommandType::Request)
+	{
+		// Request a ping message from this channel
+		communicationChannel->RequestPing();
+	}
+}
+
+void SmallPack::SmallPackCommunicationCenter::CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime)
+{
+	// For each client communication channel
+	for (auto & clientCommunicationChannel : m_ClientConnections)
+	{
+		// Commit all queued messages for this channel
+		clientCommunicationChannel->CommitQueueMessage(_packer, _composer, _totalTime);
+	}
+}
+
 void SmallPack::SmallPackCommunicationCenter::CheckForSystemMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime)
 {
 	// For each received message
@@ -61,6 +124,14 @@ void SmallPack::SmallPackCommunicationCenter::CheckForSystemMessages(SmallPackPa
 	{
 		// Get the current message
 		NetworkMessage* currentMessage = &_messageVector[i];
+
+		// Get the sender communication channel
+		SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(currentMessage->senderInfo.address, currentMessage->senderInfo.port, false);
+		if (communicationChannel == nullptr)
+		{
+			// Ignore this message, invalid sender
+			continue;
+		}
 
 		// Check the ping request
 		if (CheckFlag(currentMessage->messageHeader.messageFlags, PingCommandType::Request))
@@ -79,8 +150,8 @@ void SmallPack::SmallPackCommunicationCenter::CheckForSystemMessages(SmallPackPa
 		// Check for system messages
 		if (currentMessage->messageHeader.messageOperator == SmallPack::Operator::System)
 		{
-			// Send this system message to the correct communication channel
-			SendSystemMessageToCommunicationChannel(_packer, currentMessage, _totalTime, _elapsedTime);
+			// Process this message
+			communicationChannel->ProcessSystemMessage(_packer, currentMessage, _totalTime);
 
 			// Remove this message from the vector
 			_messageVector.erase(_messageVector.begin() + i);
@@ -114,6 +185,47 @@ SmallPack::MessagePack* SmallPack::SmallPackCommunicationCenter::CheckForNewMess
 	}
 
 	return newMessagePack;
+}
+
+SmallPack::SmallPackCommunicationChannel* SmallPack::SmallPackCommunicationCenter::GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed)
+{
+	// For each communication channel
+	for (int i = 0; i < m_ClientConnections.size(); i++)
+	{
+		// Get the current communication channel
+		SmallPackCommunicationChannel* currentCommunicationChannel = m_ClientConnections[i];
+
+		// Check if the sender is the real owner
+		if (currentCommunicationChannel->IsHost(_senderAddress, _port))
+		{
+			return currentCommunicationChannel;
+		}
+	}
+
+	// We didnt found a valid communication channel, check if we should create one
+	if (_createIfNeed)
+	{
+		// Create a new communication channel for this sender
+		SmallPackCommunicationChannel* newCommunicationChannel = CreateCommunicationChannel(_senderAddress, _port); //  SmallPackCommunicationChannel
+
+		// Initialize the new communication channel
+		bool result = newCommunicationChannel->Initialize(_senderAddress.to_string().c_str(), std::to_string(_port).c_str(), m_ControllerData.currentPort, m_ControllerData.authenticationToken);
+		if (!result)
+		{
+			delete newCommunicationChannel;
+			return nullptr;
+		}
+
+		// Insert into our vector the new created communication channel
+		m_ClientConnections.push_back(newCommunicationChannel);
+
+		// Log
+		std::cout << "Creating new connection with address: " << _senderAddress.to_string() << " at port: " << _port << std::endl;
+
+		return newCommunicationChannel;
+	}
+
+	return nullptr;
 }
 
 /*

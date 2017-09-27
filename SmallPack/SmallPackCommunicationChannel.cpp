@@ -32,11 +32,31 @@ SmallPack::SmallPackCommunicationChannel::~SmallPackCommunicationChannel()
 {
 }
 
+bool SmallPack::SmallPackCommunicationChannel::Initialize(const char* _host, const char* _port, uint32_t _answerPort, uint32_t _authenticationToken)
+{
+	// Resolve the ip version with the given host and port to get our iterator
+	udp::resolver resolver(m_ChannelData.ioService);
+	udp::resolver::query query(udp::v4(), _host, _port);
+	m_ChannelData.endpoint = *resolver.resolve(query);
+	m_ChannelData.socket.open(udp::v4());
+
+	// Set the channel data
+	m_ChannelData.address = boost::asio::ip::address::from_string(_host);;
+	m_ChannelData.port = atoi(_port);
+
+	// Set the answer port
+	SetAnswerPort(_answerPort);
+
+	// Set the authentication token
+	SetAuthenticationToken(_authenticationToken);
+
+	return true;
+}
 
 void SmallPack::SmallPackCommunicationChannel::FrameUpdate(uint32_t _currentTime, float _timeElapsed)
 {
-	// Check for ping re-send
-	if (!m_PingInfo.expectingPing && _currentTime - m_PingInfo.lastPingTime >= m_PingInfo.ping * 2.0f + m_PingInfo.ping * 0.5f)
+	// Check for ping request
+	if (!m_PingInfo.expectingPing && _currentTime - m_PingInfo.lastPingTime >= PingRequestInterval)
 	{
 		// Set that we need a new ping message
 		m_PingInfo.expectingPing = true;
@@ -79,14 +99,20 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingAnswer(SmallPackPacker
 	// Check if we are expecting a ping message
 	if (m_PingInfo.expectingPing)
 	{
-		// Log
-		std::cout << " - Received ping answer!" << std::endl;
+		// Set the ping
+		m_PingInfo.ping = _currentTime - m_PingInfo.lastRequestTime;
+
+		// Set the last ping time
+		m_PingInfo.lastPingTime = _currentTime;
 
 		// Ok we found our ping
 		m_PingInfo.expectingPing = false;
 
 		// Increment our expected identifier
 		m_PingInfo.pingExpectedIdentifier++;
+
+		// Log
+		std::cout << " - Received ping answer! Ping: " << m_PingInfo.ping << std::endl;
 	}
 }
 
@@ -99,10 +125,10 @@ void SmallPack::SmallPackCommunicationChannel::QueueMessage(SmallPack::NetworkMe
 	m_SendQueue.push_back(_message);
 }
 
-void SmallPack::SmallPackCommunicationChannel::CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _originPort, uint32_t _authToken, uint32_t _currentTime)
+void SmallPack::SmallPackCommunicationChannel::CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime)
 {
 	// Process the ping functionality
-	ProcessPingFunctionality(_packer, _composer, _originPort, _authToken, _currentTime);
+	ProcessPingFunctionality(_packer, _composer, _currentTime);
 
 	// For each queued message pack
 	for (int i = 0; i < m_SendQueue.size(); i++)
@@ -171,13 +197,13 @@ void SmallPack::SmallPackCommunicationChannel::SendMessagePack(SmallPack::Messag
 	uint32_t length = _messagePack->CopyToByteStream(data);
 
 	// Send the message pack through this channel
-	m_ChannelData.socket.send_to(boost::asio::buffer(data, length), m_ChannelData.answerEndpoint);
+	m_ChannelData.socket.send_to(boost::asio::buffer(data, length), m_ChannelData.endpoint);
 
 	// TODO: Precido tomar cuidado pois devo deixar o pack num queue de envio MAS lembrar que caso estejamos usando o reliable channel
 	// não podemos liberar esse pack depois do envio já que ele ainda é armazenado para confirmacao
 }
 
-void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _originPort, uint32_t _authToken, uint32_t _currentTime)
+void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime)
 {
 	// Check if we have at last one message inside our send queue
 	if (!m_SendQueue.size())
@@ -187,7 +213,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		{
 			// Prepare a ping answer
 			SmallPack::NetworkMessage newMessage; int dummyData = 0;
-			_composer->Compose(_packer, SmallPack::Operator::System, 0, 0, _originPort, _authToken, dummyData, newMessage);
+			_composer->Compose(_packer, SmallPack::Operator::System, 0, 0, dummyData, newMessage);
 			newMessage.messageHeader.messageFlags = SetFlag(newMessage.messageHeader.messageFlags, PingCommandType::Answer);
 			PackMessage(newMessage, _packer);
 
@@ -225,6 +251,9 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		{
 			// Adjust the expect ping flag for the first message
 			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, PingCommandType::Request);
+
+			// Set the last request time
+			m_PingInfo.lastRequestTime = _currentTime;
 		}
 	}
 }
@@ -238,6 +267,10 @@ void SmallPack::SmallPackCommunicationChannel::PackMessage(NetworkMessage& _mess
 		m_MessagePackSendList = _packer->RequestMessagePack();
 		m_MessagePackSendList->nextPack = nullptr;
 	}
+
+	// Set the message answer port and authentication token
+	_message.messageHeader.answerPort = m_AnswerPort;
+	_message.messageHeader.authToken = m_AuthenticationToken;
 
 	// Pack this message
 	if (!_packer->PackMessage(_message, m_MessagePackSendList))

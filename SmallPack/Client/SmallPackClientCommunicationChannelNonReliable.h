@@ -7,7 +7,7 @@
 // INCLUDES //
 //////////////
 #include "../SmallPackConfig.h"
-#include "SmallPackClientCommunicationChannel.h"
+#include "../SmallPackCommunicationChannel.h"
 
 #include <boost\asio.hpp>
 #include <ctime>
@@ -33,7 +33,7 @@ SmallPackamespaceBegin(Client)
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: SmallPackClientCommunicationChannelNonReliable
 ////////////////////////////////////////////////////////////////////////////////
-class SmallPackClientCommunicationChannelNonReliable : public SmallPackClientCommunicationChannel
+class SmallPackClientCommunicationChannelNonReliable : public SmallPack::SmallPackCommunicationChannel
 {
 
 public:

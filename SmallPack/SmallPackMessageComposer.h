@@ -46,7 +46,7 @@ public:
 
 	// Compose a new message
 	template <typename ObjectType>
-	bool Compose(SmallPackPacker* _packer, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, uint32_t _answerPort, uint32_t _authToken, ObjectType& _object, NetworkMessage& _networkMessage)
+	bool Compose(SmallPackPacker* _packer, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, ObjectType& _object, NetworkMessage& _networkMessage)
 	{
 		NetworkMessage newMessage;
 
@@ -55,8 +55,6 @@ public:
 		newMessage.messageHeader.messageId = _messageId;
 		newMessage.messageHeader.messageCommand = _messageCommand;
 		newMessage.messageHeader.messageFlags = 0;
-		newMessage.messageHeader.answerPort = _answerPort;
-		newMessage.messageHeader.authToken = _authToken;
 
 		// Request the message data
 		bool result = _packer->RequestReservedMessageData(&newMessage.messageData, sizeof(ObjectType));

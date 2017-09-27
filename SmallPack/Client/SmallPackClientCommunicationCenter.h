@@ -9,7 +9,7 @@
 #include "..\SmallPackConfig.h"
 
 #include "..\SmallPackCommunicationCenter.h"
-#include "SmallPackClientCommunicationChannel.h"
+#include "../SmallPackCommunicationChannel.h"
 #include "SmallPackClientCommunicationChannelNonReliable.h"
 #include "SmallPackClientCommunicationChannelReliable.h"
 #include "..\SmallPackMessagePackReceiveBuffer.h"
@@ -60,9 +60,6 @@ public:
 	// Send a message to all connected clients
 	bool BroadcastMessageToAllClients(NetworkMessage& _message);
 
-	// Check if a sender has a communication channel
-	Client::SmallPackCommunicationChannel* GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort = 0, bool _createIfNeed = false);
-
 	// <temp> return the server communication channel
 	Client::SmallPackCommunicationChannelReliable* GetServerCommunicationChannel() { return &m_ServerConnection; }
 
@@ -74,14 +71,11 @@ public:
 
 protected:
 
-	// Check if we have a given communication channel
-	virtual bool CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort, bool _createIfNeed);
+	// Check if a sender has a communication channel
+	virtual SmallPackCommunicationChannel* GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed = false);
 
-	// Send a system message to the given communication channel
-	virtual void SendSystemMessageToCommunicationChannel(SmallPackPacker* _packer, NetworkMessage* _systemMessage, uint32_t _totalTime, float _elapsedTime);
-
-	// Process a ping message
-	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime);
+	// Create a new communication channel
+	virtual SmallPackCommunicationChannel* CreateCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port);
 
 ///////////////
 // VARIABLES //
@@ -89,9 +83,6 @@ private: //////
 
 	// The server communication channel
 	Client::SmallPackCommunicationChannelReliable m_ServerConnection;
-
-	// All the p2p connections
-	std::vector<Client::SmallPackCommunicationChannel*> m_ClientConnections;
 };
 
 // Short type

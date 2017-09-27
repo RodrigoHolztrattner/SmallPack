@@ -8,7 +8,7 @@
 //////////////
 #include "SmallPackConfig.h"
 
-#include "Client\SmallPackClientCommunicationChannel.h"
+#include "SmallPackCommunicationChannel.h"
 #include "Client\SmallPackClientCommunicationChannelNonReliable.h"
 #include "Client\SmallPackClientCommunicationChannelReliable.h"
 #include "SmallPackMessagePackReceiveBuffer.h"
@@ -41,6 +41,10 @@ SmallPackamespaceBegin(SmallPack)
 class SmallPackCommunicationCenter
 {
 protected:
+
+	// The server authentication token
+	static const uint32_t ServerAuthenticationToken = 0;
+
 	// The controller data
 	struct ControllerData
 	{
@@ -55,6 +59,9 @@ protected:
 
 		// Our current port
 		uint16_t currentPort;
+
+		// Our authentication token
+		uint32_t authenticationToken;
 	};
 
 public:
@@ -62,10 +69,10 @@ public:
 	~SmallPackCommunicationCenter();
 
 	// Do the update for our communication center
-	virtual std::vector<NetworkMessage> Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime) = 0;
+	virtual std::vector<NetworkMessage> Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime);
 
 	// Commit all messages inside this communication center
-	virtual void CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime) = 0;
+	virtual void CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime);
 
 protected:
 
@@ -79,13 +86,13 @@ protected:
 	void CheckForSystemMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime);
 
 	// Process a ping message
-	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime) = 0;
+	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime);
 	
-	// Check if we have a given communication channel
-	virtual bool CommunicationChannelExists(boost::asio::ip::address _senderAddress, uint32_t _port, uint32_t _answerPort, bool _createIfNeed) = 0;
+	// Check if a sender has a communication channel
+	virtual SmallPackCommunicationChannel* GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed);
 
-	// Send a system message to the given communication channel
-	virtual void SendSystemMessageToCommunicationChannel(SmallPackPacker* _packer, NetworkMessage* _systemMessage, uint32_t _totalTime, float _elapsedTime) = 0;
+	// Create a new communication channel
+	virtual SmallPackCommunicationChannel* CreateCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port) = 0;
 
 ///////////////
 // VARIABLES //
@@ -93,6 +100,11 @@ protected: ////
 
 	// Our controller data
 	ControllerData m_ControllerData;
+
+private:
+
+	// All the p2p connections
+	std::vector<SmallPackCommunicationChannel*> m_ClientConnections;
 };
 
 // SmallPack

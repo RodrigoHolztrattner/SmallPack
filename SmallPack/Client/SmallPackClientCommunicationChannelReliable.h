@@ -7,7 +7,7 @@
 // INCLUDES //
 //////////////
 #include "../SmallPackConfig.h"
-#include "SmallPackClientCommunicationChannel.h"
+#include "../SmallPackCommunicationChannel.h"
 
 #include <boost\asio.hpp>
 #include <ctime>
@@ -43,7 +43,7 @@ SmallPackamespaceBegin(Client)
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: SmallPackClientCommunicationChannelReliable
 ////////////////////////////////////////////////////////////////////////////////
-class SmallPackClientCommunicationChannelReliable : public SmallPackClientCommunicationChannel
+class SmallPackClientCommunicationChannelReliable : public SmallPack::SmallPackCommunicationChannel
 {
 	// The reliable data structure we will use to hold the messages
 	struct ReliableData

@@ -10,12 +10,6 @@
     <ClCompile Include="Server\SmallPackServerCommunicationCenter.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="Server\SmallPackServerCommunicationChannel.cpp">
-      <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="Client\SmallPackClientCommunicationChannel.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="Client\SmallPackClientCommunicationChannelNonReliable.cpp">
       <Filter>Client</Filter>
     </ClCompile>
@@ -49,12 +43,6 @@
     <ClInclude Include="SmallPackMessagePackReceiveBuffer.h" />
     <ClInclude Include="Server\SmallPackServerCommunicationCenter.h">
       <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="Server\SmallPackServerCommunicationChannel.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="Client\SmallPackClientCommunicationChannel.h">
-      <Filter>Client</Filter>
     </ClInclude>
     <ClInclude Include="Client\SmallPackClientCommunicationChannelNonReliable.h">
       <Filter>Client</Filter>
