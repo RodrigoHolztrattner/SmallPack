@@ -27,6 +27,10 @@
 // SmallPack
 SmallPackamespaceBegin(SmallPack)
 
+//////////////////////
+// MAIN DEFINITIONS //
+//////////////////////
+
 enum class Endpoint
 {
 	Client,
@@ -43,12 +47,7 @@ enum class SystemCommands
 {
 	Ping,
 	DeliveryConfirmation,
-};
-
-struct CommandPing
-{
-	// The ping identifier
-	uint32_t pingIdentifier;
+	ClientConnectInfo
 };
 
 enum PingCommandType
@@ -62,6 +61,10 @@ struct CommandDeliveryConfirmation
 	// The confirmation identifier
 	uint32_t confirmationIdentifier;
 };
+
+/////////////////////
+// NETWORK MESSAGE //
+/////////////////////
 
 struct MessageData
 {

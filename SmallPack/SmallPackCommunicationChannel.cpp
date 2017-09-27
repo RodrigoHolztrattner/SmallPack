@@ -76,26 +76,6 @@ void SmallPack::SmallPackCommunicationChannel::ProcessSystemMessage(SmallPackPac
 
 void SmallPack::SmallPackCommunicationChannel::ProcessPingAnswer(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
 {
-	/*
-	// Check if we are expecting a ping message
-	if (m_PingInfo.expectingPing && CheckFlag(_message->messageHeader.messageFlags, PingCommandType::Answer))
-	{
-		// Get the ping data
-		CommandPing pingData;
-		_message->GetDataObject(pingData);
-
-		// Check the ping identifier
-		if (pingData.pingIdentifier == m_PingInfo.pingExpectedIdentifier)
-		{
-			// Ok we found our ping
-			m_PingInfo.expectingPing = false;
-
-			// Increment our expected identifier
-			m_PingInfo.pingExpectedIdentifier++;
-		}
-	}
-	*/
-
 	// Check if we are expecting a ping message
 	if (m_PingInfo.expectingPing)
 	{
