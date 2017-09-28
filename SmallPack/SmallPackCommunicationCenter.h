@@ -72,7 +72,7 @@ public:
 	virtual std::vector<NetworkMessage> Update(SmallPackMessagePackList* _messagePackList, SmallPackPacker* _packer, uint32_t _totalTime, float _elapsedTime);
 
 	// Commit all messages inside this communication center
-	virtual void CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime);
+	virtual void CommitMessages(SmallPackPacker* _packer, uint32_t _totalTime);
 
 protected:
 

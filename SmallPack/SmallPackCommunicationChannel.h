@@ -114,7 +114,7 @@ public:
 	void QueueMessage(SmallPack::NetworkMessage* _message);
 	
 	// Commit all queued messages
-	void CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime);
+	void CommitQueueMessage(SmallPackPacker* _packer, uint32_t _currentTime);
 
 	// Verify if the given host is the owner of this channel
 	bool IsHost(boost::asio::ip::address _address, uint32_t _port);
@@ -139,7 +139,7 @@ protected:
 private:
 
 	// Process the ping functionality
-	void ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime);
+	void ProcessPingFunctionality(SmallPackPacker* _packer, uint32_t _currentTime);
 
 	// Pack a given message and prepare it to be sent
 	void PackMessage(NetworkMessage& _message, SmallPackPacker* _packer);

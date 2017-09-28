@@ -107,13 +107,13 @@ void SmallPack::SmallPackCommunicationCenter::ProcessPingMessage(SmallPackPacker
 	}
 }
 
-void SmallPack::SmallPackCommunicationCenter::CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime)
+void SmallPack::SmallPackCommunicationCenter::CommitMessages(SmallPackPacker* _packer, uint32_t _totalTime)
 {
 	// For each client communication channel
 	for (auto & clientCommunicationChannel : m_ClientConnections)
 	{
 		// Commit all queued messages for this channel
-		clientCommunicationChannel->CommitQueueMessage(_packer, _composer, _totalTime);
+		clientCommunicationChannel->CommitQueueMessage(_packer, _totalTime);
 	}
 }
 

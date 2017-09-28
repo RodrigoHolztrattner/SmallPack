@@ -55,13 +55,13 @@ std::vector<SmallPack::NetworkMessage> SmallPack::Client::SmallPackClientCommuni
 	return messageVector;
 }
 
-void SmallPack::Client::SmallPackClientCommunicationCenter::CommitMessages(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _totalTime)
+void SmallPack::Client::SmallPackClientCommunicationCenter::CommitMessages(SmallPackPacker* _packer, uint32_t _totalTime)
 {
 	// Commit all queued messages for the server
-	m_ServerConnection.CommitQueueMessage(_packer, _composer, _totalTime);
+	m_ServerConnection.CommitQueueMessage(_packer, _totalTime);
 
 	// Call the parent method
-	SmallPack::SmallPackCommunicationCenter::CommitMessages(_packer, _composer, _totalTime);
+	SmallPack::SmallPackCommunicationCenter::CommitMessages(_packer, _totalTime);
 }
 
 bool SmallPack::Client::SmallPackClientCommunicationCenter::BroadcastMessageToAllClients(NetworkMessage& _message)

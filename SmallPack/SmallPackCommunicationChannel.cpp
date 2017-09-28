@@ -105,10 +105,10 @@ void SmallPack::SmallPackCommunicationChannel::QueueMessage(SmallPack::NetworkMe
 	m_SendQueue.push_back(_message);
 }
 
-void SmallPack::SmallPackCommunicationChannel::CommitQueueMessage(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime)
+void SmallPack::SmallPackCommunicationChannel::CommitQueueMessage(SmallPackPacker* _packer, uint32_t _currentTime)
 {
 	// Process the ping functionality
-	ProcessPingFunctionality(_packer, _composer, _currentTime);
+	ProcessPingFunctionality(_packer, _currentTime);
 
 	// For each queued message pack
 	for (int i = 0; i < m_SendQueue.size(); i++)
@@ -183,7 +183,7 @@ void SmallPack::SmallPackCommunicationChannel::SendMessagePack(SmallPack::Messag
 	// não podemos liberar esse pack depois do envio já que ele ainda é armazenado para confirmacao
 }
 
-void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPackPacker* _packer, SmallPackMessageComposer* _composer, uint32_t _currentTime)
+void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPackPacker* _packer, uint32_t _currentTime)
 {
 	// Check if we have at last one message inside our send queue
 	if (!m_SendQueue.size())
@@ -193,7 +193,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		{
 			// Prepare a ping answer
 			SmallPack::NetworkMessage newMessage; int dummyData = 0;
-			_composer->Compose(_packer, SmallPack::Operator::System, 0, 0, dummyData, newMessage);
+			SmallPackMessageComposer::Compose(_packer, newMessage, SmallPack::Operator::System, 0, 0, &dummyData);
 			newMessage.messageHeader.messageFlags = SetFlag(newMessage.messageHeader.messageFlags, PingCommandType::Answer);
 			PackMessage(newMessage, _packer);
 

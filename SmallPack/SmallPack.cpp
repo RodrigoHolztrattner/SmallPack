@@ -25,7 +25,6 @@ struct Vector
 
 int main()
 {
-	SmallPack::SmallPackMessageComposer messageComposer;
 	SmallPack::SmallPackMessagePackList messagePackList;
 	SmallPack::SmallPackPacker messagePacker(messagePackList);
 	boost::asio::io_service ioService;
@@ -81,7 +80,7 @@ int main()
 		// Compose a dummy message
 		SmallPack::NetworkMessage newMessage;
 		int dummyData = 5;
-		messageComposer.Compose(&messagePacker, SmallPack::Operator::System, 0, 0, dummyData, newMessage);
+		SmallPack::SmallPackMessageComposer::Compose(&messagePacker, newMessage, SmallPack::Operator::System, 0, 0, &dummyData);
 
 		// Queue the message to be sent
 		communcationCenter.GetServerCommunicationChannel()->QueueMessage(&newMessage);
@@ -118,7 +117,7 @@ int main()
 			}
 
 			// Commit
-			communcationCenter.CommitMessages(&messagePacker, &messageComposer, end - initialTime);
+			communcationCenter.CommitMessages(&messagePacker, end - initialTime);
 
 			// Reset the message packer frame
 			messagePacker.ResetFrame();		
@@ -161,7 +160,7 @@ int main()
 			std::vector<SmallPack::NetworkMessage> messages = communcationCenter.Update(&messagePackList, &messagePacker, end - initialTime, elapsed_secs);
 
 			// Commit
-			communcationCenter.CommitMessages(&messagePacker, &messageComposer, end - initialTime);
+			communcationCenter.CommitMessages(&messagePacker, end - initialTime);
 
 			// Reset the message packer frame
 			messagePacker.ResetFrame();

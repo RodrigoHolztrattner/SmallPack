@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "SmallPackClientCommunicationChannelReliable.h"
 #include "..\SmallPackPacker.h"
+#include "..\SmallPackMessageComposer.h"
 #include <cstdio>
 
 using namespace boost::asio::ip;
@@ -37,10 +38,11 @@ void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessSyst
 	{
 		// Get the confirmation data
 		CommandDeliveryConfirmation deliveryConfirmationData;
-		_message->GetDataObject(deliveryConfirmationData);
-
-		// Process the delivery confirmation for this message
-		ProcessDeliveryConfirmation(_packer, deliveryConfirmationData);
+		if (SmallPackMessageComposer::GetDataObject(_message, deliveryConfirmationData))
+		{
+			// Process the delivery confirmation for this message
+			ProcessDeliveryConfirmation(_packer, deliveryConfirmationData);
+		}
 	}
 
 	// Call the base function

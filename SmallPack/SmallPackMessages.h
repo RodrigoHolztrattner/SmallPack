@@ -161,22 +161,6 @@ struct NetworkMessage
 	{
 		messageTotalSize = sizeof(uint32_t) + sizeof(MessageHeader) + sizeof(uint32_t) + sizeof(unsigned char) * messageData.dataSize;
 	}
-
-	// Return the message data (cast to the given object type)
-	template <typename ObjectType>
-	bool GetDataObject(ObjectType& _object)
-	{
-		// Check if the sizes are equal
-		if (messageData.dataSize != sizeof(ObjectType))
-		{
-			return false;
-		}
-
-		// Set the object
-		_object = *(ObjectType*)messageData.dataPtr;
-
-		return true;
-	}
 };
 
 // SmallPack
