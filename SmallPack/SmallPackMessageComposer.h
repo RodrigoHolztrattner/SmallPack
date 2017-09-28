@@ -50,9 +50,15 @@ public:
 		- Permitir receber multiplos objetos de uma mensagem
 	*/
 
-	// Compose a new message
+	// Compose a new message using one or more objects
 	template <typename ObjectType>
-	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, ObjectType _object, uint32_t _totalObjects = 1)
+	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, ObjectType* _object, uint32_t _totalObjects = 1)
+	{
+		return Compose(_packer, _networkMessage, _messageOperator, _messageCommand, _messageId, _object, sizeof(ObjectType) * _totalObjects);
+	}
+
+	// Compose a new message
+	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, unsigned char* _data, uint32_t _dataSize)
 	{
 		NetworkMessage newMessage;
 
@@ -63,7 +69,7 @@ public:
 		newMessage.messageHeader.messageFlags = 0;
 
 		// Request the message data
-		bool result = _packer->RequestReservedMessageData(&newMessage.messageData, sizeof(ObjectType) * _totalObjects);
+		bool result = _packer->RequestReservedMessageData(&newMessage.messageData, _dataSize);
 		if (!result)
 		{
 			// Could not allocate the data for the message
@@ -71,7 +77,7 @@ public:
 		}
 
 		// Copy the message object
-		memcpy(newMessage.messageData.dataPtr, _object, sizeof(ObjectType) * _totalObjects);
+		memcpy(newMessage.messageData.dataPtr, _data, _dataSize);
 
 		// Compute the message total size
 		newMessage.ComputeMessageTotalSize();
@@ -96,6 +102,42 @@ public:
 		_object = *(ObjectType*)_message->messageData.dataPtr;
 
 		return true;
+	}
+
+	// Return the message data (cast to the given object vector type)
+	template <typename ObjectType>
+	static bool GetDataObject(NetworkMessage* _message, std::vector<ObjectType>& _object)
+	{
+		// Check if the size fina
+		if (_message->messageData.dataSize % sizeof(ObjectType) != 0)
+		{
+			return false;
+		}
+
+		// Get the total number of objects
+		unsigned int totalObjects = _message->messageData.dataSize / sizeof(ObjectType);
+
+		// For each objects
+		unsigned int location = 0;
+		for (int i = 0; i < totalObjects; i++)
+		{
+			_object.push_back(*(ObjectType*)(&_message->messageData.dataPtr[location]));
+			location += sizeof(ObjectType);
+		}
+
+		return true;
+	}
+
+	// Return the message size
+	static uint32_t GetMessageDataSize(NetworkMessage* _message)
+	{
+		return _message->messageData.dataSize;
+	}
+
+	// Return the message data
+	static unsigned char* GetMessageDataPtr(NetworkMessage* _message)
+	{
+		return _message->messageData.dataPtr;
 	}
 
 private:
