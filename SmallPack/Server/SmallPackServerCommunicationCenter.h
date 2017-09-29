@@ -48,6 +48,9 @@ public:
 
 public:
 
+	// Broadcast the client connection info
+	void BroadcastClientConnectionInfo(SmallPackPacker* _packer, uint32_t _currentTime);
+
 	// Initialize the communication controller
 	bool Initialize(uint16_t _selfPort);
 

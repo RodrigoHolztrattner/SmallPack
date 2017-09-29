@@ -4,6 +4,8 @@
 #include "SmallPackServerCommunicationCenter.h"
 
 #include "../SmallPackPacker.h"
+#include "../SmallPackMessageComposer.h"
+
 #include <iostream>
 
 using namespace boost::asio::ip;
@@ -16,6 +18,36 @@ SmallPack::Server::SmallPackServerCommunicationCenter::SmallPackServerCommunicat
 
 SmallPack::Server::SmallPackServerCommunicationCenter::~SmallPackServerCommunicationCenter()
 {
+}
+
+void SmallPack::Server::SmallPackServerCommunicationCenter::BroadcastClientConnectionInfo(SmallPackPacker* _packer, uint32_t _currentTime)
+{
+	// Our new message
+	SmallPack::NetworkMessage newMessage;
+
+	// The client connection info
+	std::vector<CommandClientConnectionInfo> clientConnectionInfo;
+
+	//
+	//
+
+	// Set the client connection info data
+	clientConnectionInfo.push_back(CommandClientConnectionInfo("127.0.0.1", 22223, 0, 1));
+	clientConnectionInfo.push_back(CommandClientConnectionInfo("127.0.0.1", 22224, 1, 1));
+
+	//
+	//
+
+	// Compose our message
+	SmallPack::SmallPackMessageComposer::Compose(_packer, newMessage, SmallPack::Operator::System, (uint32_t)SystemCommands::ClientConnectInfo, 0, clientConnectionInfo.data(), clientConnectionInfo.size());
+
+	// For each client, send the message
+	for (auto & client : m_ClientConnections)
+	{
+		// Queue the message and commit it
+		client->QueueMessage(&newMessage);
+		client->CommitQueueMessage(_packer, _currentTime);
+	}
 }
 
 bool SmallPack::Server::SmallPackServerCommunicationCenter::Initialize(uint16_t _selfPort)

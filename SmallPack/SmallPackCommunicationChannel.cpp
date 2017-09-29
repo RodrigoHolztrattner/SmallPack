@@ -71,7 +71,11 @@ void SmallPack::SmallPackCommunicationChannel::FrameUpdate(uint32_t _currentTime
 
 void SmallPack::SmallPackCommunicationChannel::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
 {
-
+	if ((SystemCommands)_message->messageHeader.messageCommand == SystemCommands::ClientConnectInfo)
+	{
+		// 
+		std::cout << "- Received client connect info from server" << std::endl;
+	}
 }
 
 void SmallPack::SmallPackCommunicationChannel::ProcessPingAnswer(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)

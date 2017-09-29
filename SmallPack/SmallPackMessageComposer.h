@@ -54,7 +54,7 @@ public:
 	template <typename ObjectType>
 	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, ObjectType* _object, uint32_t _totalObjects = 1)
 	{
-		return Compose(_packer, _networkMessage, _messageOperator, _messageCommand, _messageId, _object, sizeof(ObjectType) * _totalObjects);
+		return Compose(_packer, _networkMessage, _messageOperator, _messageCommand, _messageId, (unsigned char*)_object, sizeof(ObjectType) * _totalObjects);
 	}
 
 	// Compose a new message

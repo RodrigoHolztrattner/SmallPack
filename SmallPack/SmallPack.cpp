@@ -126,6 +126,7 @@ int main()
 	else
 	{
 		uint32_t selfPort;
+		float acc = 0;
 
 		// Digite a porta usada pelo proprio server
 		std::cout << std::endl << "    - Digite a porta a ser utilizada por este server: ";
@@ -159,8 +160,15 @@ int main()
 			// Do the update for our communication center
 			std::vector<SmallPack::NetworkMessage> messages = communcationCenter.Update(&messagePackList, &messagePacker, end - initialTime, elapsed_secs);
 
+			acc += elapsed_secs;
+			if (acc > 1)
+			{
+				acc = 0;
+				communcationCenter.BroadcastClientConnectionInfo(&messagePacker, end - initialTime);
+			}
+
 			// Commit
-			communcationCenter.CommitMessages(&messagePacker, end - initialTime);
+			// communcationCenter.CommitMessages(&messagePacker, end - initialTime);
 
 			// Reset the message packer frame
 			messagePacker.ResetFrame();

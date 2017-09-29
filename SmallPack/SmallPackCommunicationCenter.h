@@ -101,7 +101,7 @@ protected: ////
 	// Our controller data
 	ControllerData m_ControllerData;
 
-private:
+// private:
 
 	// All the p2p connections
 	std::vector<SmallPackCommunicationChannel*> m_ClientConnections;

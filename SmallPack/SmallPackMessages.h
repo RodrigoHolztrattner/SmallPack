@@ -11,6 +11,7 @@
 #include <boost\asio.hpp>
 #include <cstdint>
 #include <memory>
+#include <string.h>
 
 /////////////
 // DEFINES //
@@ -60,6 +61,26 @@ struct CommandDeliveryConfirmation
 {
 	// The confirmation identifier
 	uint32_t confirmationIdentifier;
+};
+
+struct CommandClientConnectionInfo
+{
+	CommandClientConnectionInfo(char* _ip, uint32_t _port, uint32_t _globalIdentifier, uint32_t _authToken) : port(_port), clientGlobalIdentifier(_globalIdentifier), clientAuthenticationToken(_authToken)
+	{
+		strcpy(ip, _ip);
+	}
+
+	// The client ip
+	char ip[16];
+
+	// The client port
+	uint32_t port;
+
+	// The client global identifier
+	uint32_t clientGlobalIdentifier;
+
+	// The client authentication token
+	uint32_t clientAuthenticationToken;
 };
 
 /////////////////////
