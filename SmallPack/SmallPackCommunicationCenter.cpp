@@ -32,14 +32,33 @@ std::vector<SmallPack::NetworkMessage> SmallPack::SmallPackCommunicationCenter::
 		GetMessagesFromPack(_packer, newPack, senderEndpoint, messageVector, false);
 	}
 
-	// Check for system messages
-	CheckForSystemMessages(_packer, messageVector, _totalTime, _elapsedTime);
+	// Check for internal messages
+	CheckForInternalMessages(_packer, messageVector, _totalTime, _elapsedTime);
 
 	// For each client communication channel
-	for (auto & clientCommunicationChannel : m_ClientConnections)
+	for (int i=0; i<m_ClientConnections.size(); i++)
 	{
+		// Get the client channel
+		SmallPackCommunicationChannel* clientCommunicationChannel = m_ClientConnections[i];
+
 		// Do the frame update for this channel
 		clientCommunicationChannel->FrameUpdate(_totalTime, _elapsedTime);
+
+		// Check if we should delete this channel
+		if (clientCommunicationChannel->ShouldDelete(_totalTime, _elapsedTime))
+		{
+			// Log
+			std::cout << " - Deleting communication channel" << std::endl;
+
+			// Delete the channel
+			delete m_ClientConnections[i];
+
+			// Remove the channel from the vector
+			m_ClientConnections.erase(m_ClientConnections.begin() + i);
+
+			// Go back 1 from the current index
+			i--;
+		}
 	}
 
 	// Return the message vector
@@ -84,7 +103,7 @@ void SmallPack::SmallPackCommunicationCenter::GetMessagesFromPack(SmallPackPacke
 	_packer->ReleaseMessagePack(_messagePack);
 }
 
-void SmallPack::SmallPackCommunicationCenter::ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime)
+void SmallPack::SmallPackCommunicationCenter::ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, CommandFlags _flags, uint32_t _totalTime)
 {
 	// Get the sender communication channel
 	SmallPackCommunicationChannel* communicationChannel = GetSenderCommunicationChannel(_message->senderInfo.address, _message->senderInfo.port, false);
@@ -95,12 +114,12 @@ void SmallPack::SmallPackCommunicationCenter::ProcessPingMessage(SmallPackPacker
 	}
 
 	// Check the ping type
-	if (_type == PingCommandType::Answer)
+	if (_flags == CommandFlags::Answer)
 	{
 		// Process the ping answer for this channel
 		communicationChannel->ProcessPingAnswer(_packer, _message, _totalTime);
 	}
-	else if (_type == PingCommandType::Request)
+	else if (_flags == CommandFlags::Request)
 	{
 		// Request a ping message from this channel
 		communicationChannel->RequestPing();
@@ -117,7 +136,7 @@ void SmallPack::SmallPackCommunicationCenter::CommitMessages(SmallPackPacker* _p
 	}
 }
 
-void SmallPack::SmallPackCommunicationCenter::CheckForSystemMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime)
+void SmallPack::SmallPackCommunicationCenter::CheckForInternalMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime)
 {
 	// For each received message
 	for (int i = 0; i<_messageVector.size(); i++)
@@ -134,30 +153,46 @@ void SmallPack::SmallPackCommunicationCenter::CheckForSystemMessages(SmallPackPa
 		}
 
 		// Check the ping request
-		if (CheckFlag(currentMessage->messageHeader.messageFlags, PingCommandType::Request))
+		if (CheckFlag(currentMessage->messageHeader.messageFlags, CommandFlags::Request))
 		{
 			// Process this ping message
-			ProcessPingMessage(_packer, currentMessage, PingCommandType::Request, _totalTime);
+			ProcessPingMessage(_packer, currentMessage, CommandFlags::Request, _totalTime);
 		}
 
 		// Check the ping answer
-		if (CheckFlag(currentMessage->messageHeader.messageFlags, PingCommandType::Answer))
+		if (CheckFlag(currentMessage->messageHeader.messageFlags, CommandFlags::Answer))
 		{
 			// Process this ping message
-			ProcessPingMessage(_packer, currentMessage, PingCommandType::Answer, _totalTime);
+			ProcessPingMessage(_packer, currentMessage, CommandFlags::Answer, _totalTime);
 		}
 
 		// Check for system messages
 		if (currentMessage->messageHeader.messageOperator == SmallPack::Operator::System)
 		{
-			// Process this message
-			communicationChannel->ProcessSystemMessage(_packer, currentMessage, _totalTime);
+			// Check for the client connect info
+			if (currentMessage->messageHeader.messageCommand == SystemCommands::ClientConnectInfo)
+			{
+				// Process the client connect message
+				ProcessClientConnectMessage(_packer, currentMessage);
+			}
+			// No results, just propagate the message
+			else
+			{
+				// Propagate the message to the channel
+				communicationChannel->ProcessChannelInternalMessage(_packer, currentMessage, _totalTime);
+			}
+
 
 			// Remove this message from the vector
 			_messageVector.erase(_messageVector.begin() + i);
 			i--;
 		}
 	}
+}
+
+void SmallPack::SmallPackCommunicationCenter::ProcessClientConnectMessage(SmallPackPacker* _packer, NetworkMessage* _message)
+{
+	// Do nothing
 }
 
 SmallPack::MessagePack* SmallPack::SmallPackCommunicationCenter::CheckForNewMessages(SmallPackMessagePackList* _messagePackList, udp::endpoint& _endpoint)
@@ -176,9 +211,6 @@ SmallPack::MessagePack* SmallPack::SmallPackCommunicationCenter::CheckForNewMess
 		const uint32_t bufferSize = 2048;
 		unsigned char data[bufferSize];
 		size_t length = m_ControllerData.connectionSocket.receive_from(boost::asio::buffer(data, bufferSize), _endpoint);
-
-		// boost::system::error_code ignored_error;
-		// m_ControllerData.connectionSocket.send_to(boost::asio::buffer(data, bufferSize), _endpoint, 0, ignored_error);
 
 		// Copy into the message pack
 		newMessagePack->CopyFromByteStream(data, length);
@@ -220,40 +252,10 @@ SmallPack::SmallPackCommunicationChannel* SmallPack::SmallPackCommunicationCente
 		m_ClientConnections.push_back(newCommunicationChannel);
 
 		// Log
-		std::cout << "Creating new connection with address: " << _senderAddress.to_string() << " at port: " << _port << std::endl;
+		std::cout << " - Creating new connection with address: " << _senderAddress.to_string() << " at port: " << _port << std::endl;
 
 		return newCommunicationChannel;
 	}
 
 	return nullptr;
 }
-
-/*
-
-
-SmallPack::MessagePack* SmallPack::Client::SmallPackClientCommunicationCenter::CheckForNewMessages(SmallPackMessagePackList* _messagePackList, udp::endpoint& _endpoint)
-{
-// Check if we have any messages avaliable
-if (!m_ControllerData.connectionSocket.available())
-{
-return nullptr;
-}
-
-// Request a new message pack
-MessagePack* newMessagePack = _messagePackList->RequestPack();
-
-// Receive the message pack
-{
-const uint32_t bufferSize = 2048;
-unsigned char data[bufferSize];
-size_t length = m_ControllerData.connectionSocket.receive_from(boost::asio::buffer(data, bufferSize), _endpoint);
-
-// Copy into the message pack
-newMessagePack->CopyFromByteStream(data, length);
-}
-
-return newMessagePack;
-}
-
-
-*/

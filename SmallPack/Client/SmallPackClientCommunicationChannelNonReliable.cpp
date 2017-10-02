@@ -6,7 +6,7 @@
 
 using namespace boost::asio::ip;
 
-SmallPack::Client::SmallPackClientCommunicationChannelNonReliable::SmallPackClientCommunicationChannelNonReliable(boost::asio::io_service& _ioService) : SmallPack::SmallPackCommunicationChannel(_ioService)
+SmallPack::Client::SmallPackClientCommunicationChannelNonReliable::SmallPackClientCommunicationChannelNonReliable(boost::asio::io_service& _ioService, bool _canExpire) : SmallPack::SmallPackCommunicationChannel(_ioService, _canExpire)
 {
 }
 
@@ -27,8 +27,8 @@ void SmallPack::Client::SmallPackClientCommunicationChannelNonReliable::FrameUpd
 	SmallPackCommunicationChannel::FrameUpdate(_currentTime, _timeElapsed);
 }
 
-void SmallPack::Client::SmallPackClientCommunicationChannelNonReliable::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
+void SmallPack::Client::SmallPackClientCommunicationChannelNonReliable::ProcessChannelInternalMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
 {
 	// Call the base function
-	SmallPackCommunicationChannel::ProcessSystemMessage(_packer, _message, _currentTime);
+	SmallPackCommunicationChannel::ProcessChannelInternalMessage(_packer, _message, _currentTime);
 }

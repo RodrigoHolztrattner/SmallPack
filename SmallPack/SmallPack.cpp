@@ -80,7 +80,7 @@ int main()
 		// Compose a dummy message
 		SmallPack::NetworkMessage newMessage;
 		int dummyData = 5;
-		SmallPack::SmallPackMessageComposer::Compose(&messagePacker, newMessage, SmallPack::Operator::System, 0, 0, &dummyData);
+		SmallPack::SmallPackMessageComposer::Compose(&messagePacker, newMessage, SmallPack::Operator::System, SmallPack::SystemCommands::None, 0, &dummyData);
 
 		// Queue the message to be sent
 		communcationCenter.GetServerCommunicationChannel()->QueueMessage(&newMessage);
@@ -112,8 +112,7 @@ int main()
 
 				// Queue the message to be sent
 				communcationCenter.GetServerCommunicationChannel()->QueueMessage(&newMessage);
-
-				std::cout << "Message sent to the server" << std::endl;
+				communcationCenter.BroadcastMessageToAllClients(&messagePacker, newMessage, end - initialTime);
 			}
 
 			// Commit
@@ -161,10 +160,14 @@ int main()
 			std::vector<SmallPack::NetworkMessage> messages = communcationCenter.Update(&messagePackList, &messagePacker, end - initialTime, elapsed_secs);
 
 			acc += elapsed_secs;
-			if (acc > 1)
+			if (acc > 2)
 			{
 				acc = 0;
 				communcationCenter.BroadcastClientConnectionInfo(&messagePacker, end - initialTime);
+			}
+			else
+			{
+				communcationCenter.CommitMessages(&messagePacker, end - initialTime);
 			}
 
 			// Commit

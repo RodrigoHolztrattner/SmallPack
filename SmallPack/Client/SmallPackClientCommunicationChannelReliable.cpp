@@ -8,7 +8,7 @@
 
 using namespace boost::asio::ip;
 
-SmallPack::Client::SmallPackClientCommunicationChannelReliable::SmallPackClientCommunicationChannelReliable(boost::asio::io_service& _ioService) : SmallPack::SmallPackCommunicationChannel(_ioService)
+SmallPack::Client::SmallPackClientCommunicationChannelReliable::SmallPackClientCommunicationChannelReliable(boost::asio::io_service& _ioService, bool _canExpire) : SmallPack::SmallPackCommunicationChannel(_ioService, _canExpire)
 {
 }
 
@@ -31,7 +31,7 @@ void SmallPack::Client::SmallPackClientCommunicationChannelReliable::FrameUpdate
 	SmallPackCommunicationChannel::FrameUpdate(_currentTime, _timeElapsed);
 }
 
-void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
+void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessChannelInternalMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
 {
 	// Look for the delivery confirmation message type
 	if (_message->messageHeader.IsFromType(SystemCommands::DeliveryConfirmation))
@@ -46,7 +46,7 @@ void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessSyst
 	}
 
 	// Call the base function
-	SmallPackCommunicationChannel::ProcessSystemMessage(_packer, _message, _currentTime);
+	SmallPackCommunicationChannel::ProcessChannelInternalMessage(_packer, _message, _currentTime);
 }
 
 void SmallPack::Client::SmallPackClientCommunicationChannelReliable::ProcessSentMessagePack(SmallPackPacker* _packer, MessagePack* _messagePack, uint32_t _currentTime)

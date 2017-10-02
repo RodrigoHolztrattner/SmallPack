@@ -17,3 +17,5 @@ SmallPack/Debug/
 SmallPack/ThirdParty/boost/
 SmallPack/x64/
 *.TMP
+SmallPack/Release/
+Release/

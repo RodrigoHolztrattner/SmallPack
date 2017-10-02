@@ -52,13 +52,14 @@ public:
 
 	// Compose a new message using one or more objects
 	template <typename ObjectType>
-	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, ObjectType* _object, uint32_t _totalObjects = 1)
+	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, SystemCommands _messageCommand, uint32_t _messageId, ObjectType* _object, uint32_t _totalObjects = 1)
 	{
+		int bla = sizeof(ObjectType);
 		return Compose(_packer, _networkMessage, _messageOperator, _messageCommand, _messageId, (unsigned char*)_object, sizeof(ObjectType) * _totalObjects);
 	}
 
 	// Compose a new message
-	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, uint32_t _messageCommand, uint32_t _messageId, unsigned char* _data, uint32_t _dataSize)
+	static bool Compose(SmallPackPacker* _packer, NetworkMessage& _networkMessage, Operator _messageOperator, SystemCommands _messageCommand, uint32_t _messageId, unsigned char* _data, uint32_t _dataSize)
 	{
 		NetworkMessage newMessage;
 

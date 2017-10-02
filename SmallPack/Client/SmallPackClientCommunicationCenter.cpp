@@ -5,10 +5,11 @@
 #include <iostream>
 
 #include "..\SmallPackPacker.h"
+#include "..\SmallPackMessageComposer.h"
 
 using namespace boost::asio::ip;
 
-SmallPack::Client::SmallPackClientCommunicationCenter::SmallPackClientCommunicationCenter(boost::asio::io_service& _ioService) : SmallPack::SmallPackCommunicationCenter(_ioService), m_ServerConnection(_ioService)
+SmallPack::Client::SmallPackClientCommunicationCenter::SmallPackClientCommunicationCenter(boost::asio::io_service& _ioService) : SmallPack::SmallPackCommunicationCenter(_ioService), m_ServerConnection(_ioService, false)
 {
 	// Set the initial data
 	// ...
@@ -64,8 +65,37 @@ void SmallPack::Client::SmallPackClientCommunicationCenter::CommitMessages(Small
 	SmallPack::SmallPackCommunicationCenter::CommitMessages(_packer, _totalTime);
 }
 
-bool SmallPack::Client::SmallPackClientCommunicationCenter::BroadcastMessageToAllClients(NetworkMessage& _message)
+void SmallPack::Client::SmallPackClientCommunicationCenter::ProcessClientConnectMessage(SmallPackPacker* _packer, NetworkMessage* _message)
 {
+	// Get the confirmation data
+	std::vector<CommandClientConnectionInfo> connectionInfoData;
+	if (SmallPackMessageComposer::GetDataObject(_message, connectionInfoData))
+	{
+		// For each client we should connect
+		for (auto & clientInfo : connectionInfoData)
+		{
+			// Get the communication channel for this client (create if there is no one)
+			SmallPackCommunicationChannel* clientChannel = GetSenderCommunicationChannel(boost::asio::ip::address::from_string(clientInfo.ip), clientInfo.port, true);
+		
+			// Reset the expire timer for this channel
+			clientChannel->ResetExpireTimer();
+		}
+	}
+
+	// Call the parent function
+	SmallPack::SmallPackCommunicationCenter::ProcessClientConnectMessage(_packer, _message);
+}
+
+bool SmallPack::Client::SmallPackClientCommunicationCenter::BroadcastMessageToAllClients(SmallPackPacker* _packer, NetworkMessage& _message, uint32_t _totalTime)
+{
+	// For each client, send the message
+	for (auto & client : m_ClientConnections)
+	{
+		// Queue the message and commit it
+		client->QueueMessage(&_message);
+		client->CommitQueueMessage(_packer, _totalTime);
+	}
+
 	return true;
 }
 
@@ -82,5 +112,5 @@ SmallPack::SmallPackCommunicationChannel* SmallPack::Client::SmallPackClientComm
 
 SmallPack::SmallPackCommunicationChannel* SmallPack::Client::SmallPackClientCommunicationCenter::CreateCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port)
 {
-	return new SmallPackCommunicationChannelNonReliable(m_ControllerData.ioService);
+	return new SmallPackCommunicationChannelNonReliable(m_ControllerData.ioService, true);
 }

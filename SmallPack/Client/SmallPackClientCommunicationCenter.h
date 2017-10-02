@@ -58,7 +58,7 @@ public:
 	bool Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort);
 
 	// Send a message to all connected clients
-	bool BroadcastMessageToAllClients(NetworkMessage& _message);
+	bool BroadcastMessageToAllClients(SmallPackPacker* _packer, NetworkMessage& _message, uint32_t _totalTime);
 
 	// <temp> return the server communication channel
 	Client::SmallPackCommunicationChannelReliable* GetServerCommunicationChannel() { return &m_ServerConnection; }
@@ -76,6 +76,9 @@ protected:
 
 	// Create a new communication channel
 	virtual SmallPackCommunicationChannel* CreateCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port);
+
+	// Process a client connect info message
+	virtual void ProcessClientConnectMessage(SmallPackPacker* _packer, NetworkMessage* _message);
 
 ///////////////
 // VARIABLES //

@@ -10,7 +10,7 @@
 
 using namespace boost::asio::ip;
 
-SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(boost::asio::io_service& _ioService) : m_ChannelData(_ioService)
+SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(boost::asio::io_service& _ioService, bool _canExpire) : m_ChannelData(_ioService)
 {
 	// Set the initial data
 	m_PingInfo.ping = PingInfo::InitialPing;
@@ -20,6 +20,7 @@ SmallPack::SmallPackCommunicationChannel::SmallPackCommunicationChannel(boost::a
 	m_PingInfo.pingExpectedIdentifier = 0;
 	m_MessagePackSendList = nullptr;
 	m_AuthenticationToken = 0;
+	m_CanExpire = _canExpire;
 }
 
 /*
@@ -62,20 +63,16 @@ void SmallPack::SmallPackCommunicationChannel::FrameUpdate(uint32_t _currentTime
 		m_PingInfo.expectingPing = true;
 
 		// Log
-		std::cout << "We are now expecting a ping message!" << std::endl;
+		// std::cout << "We are now expecting a ping message!" << std::endl;
 	}
 
 	// Check if our ping request timed out
 	// ...
 }
 
-void SmallPack::SmallPackCommunicationChannel::ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
+void SmallPack::SmallPackCommunicationChannel::ProcessChannelInternalMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
 {
-	if ((SystemCommands)_message->messageHeader.messageCommand == SystemCommands::ClientConnectInfo)
-	{
-		// 
-		std::cout << "- Received client connect info from server" << std::endl;
-	}
+	// Do nothing
 }
 
 void SmallPack::SmallPackCommunicationChannel::ProcessPingAnswer(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
@@ -96,7 +93,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingAnswer(SmallPackPacker
 		m_PingInfo.pingExpectedIdentifier++;
 
 		// Log
-		std::cout << " - Received ping answer! Ping: " << m_PingInfo.ping << std::endl;
+		std::cout << " - Received ping answer from port: " << GetPort() << " - ping: " << m_PingInfo.ping << std::endl;
 	}
 }
 
@@ -150,7 +147,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessSentMessagePack(SmallPackP
 void SmallPack::SmallPackCommunicationChannel::RequestPing()
 {
 	// Log
-	std::cout << " - Received ping request!" << std::endl;
+	// std::cout << " - Received ping request!" << std::endl;
 
 	// Set the ping info
 	m_PingInfo.receivedRequestedPing = true;
@@ -159,6 +156,43 @@ void SmallPack::SmallPackCommunicationChannel::RequestPing()
 void SmallPack::SmallPackCommunicationChannel::SetAuthenticationToken(uint32_t _token)
 {
 	m_AuthenticationToken = _token;
+}
+
+void SmallPack::SmallPackCommunicationChannel::SetCanExpire()
+{
+	m_CanExpire = true;
+}
+
+void SmallPack::SmallPackCommunicationChannel::ResetExpireTimer()
+{
+	m_ExpireTime = ExpireTimeAmount;
+}
+
+bool SmallPack::SmallPackCommunicationChannel::ShouldDelete(uint32_t _currentTime, float _timeElapsed)
+{
+	// If this channel can expire
+	if (m_CanExpire)
+	{
+		// Reduce the expire time
+		m_ExpireTime -= _timeElapsed;
+
+		// Check if we expired
+		if (m_ExpireTime <= 0)
+		{
+			// We expired
+			return true;
+		}
+	}
+
+	// Check if we timed out
+	if (_currentTime - m_PingInfo.lastPingTime >= TimeOutAmount)
+	{
+		// We timed out
+		// ...
+		// std::cout << "Connection TimedOut" << std::endl;
+	}
+
+	return false;
 }
 
 void SmallPack::SmallPackCommunicationChannel::SetAnswerPort(uint32_t _port)
@@ -197,12 +231,12 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		{
 			// Prepare a ping answer
 			SmallPack::NetworkMessage newMessage; int dummyData = 0;
-			SmallPackMessageComposer::Compose(_packer, newMessage, SmallPack::Operator::System, 0, 0, &dummyData);
-			newMessage.messageHeader.messageFlags = SetFlag(newMessage.messageHeader.messageFlags, PingCommandType::Answer);
+			SmallPackMessageComposer::Compose(_packer, newMessage, SmallPack::Operator::System, SmallPack::SystemCommands::None, 0, &dummyData);
+			newMessage.messageHeader.messageFlags = SetFlag(newMessage.messageHeader.messageFlags, CommandFlags::Answer);
 			PackMessage(newMessage, _packer);
 
 			// Log
-			std::cout << " - Sending ping answer!" << std::endl;
+			// std::cout << " - Sending ping answer!" << std::endl;
 
 			// Set that we sent the ping message
 			m_PingInfo.receivedRequestedPing = false;
@@ -224,7 +258,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		if (m_PingInfo.receivedRequestedPing)
 		{
 			// Adjust the request ping flag for the first message
-			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, PingCommandType::Answer);
+			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, CommandFlags::Answer);
 
 			// Set that we sent the ping message
 			m_PingInfo.receivedRequestedPing = false;
@@ -234,7 +268,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		if (m_PingInfo.expectingPing)
 		{
 			// Adjust the expect ping flag for the first message
-			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, PingCommandType::Request);
+			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, CommandFlags::Request);
 
 			// Set the last request time
 			m_PingInfo.lastRequestTime = _currentTime;

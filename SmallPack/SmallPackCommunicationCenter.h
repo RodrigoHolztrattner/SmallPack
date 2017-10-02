@@ -82,17 +82,20 @@ protected:
 	// Check for messages
 	SmallPack::MessagePack* CheckForNewMessages(SmallPackMessagePackList* _messagePackList, boost::asio::ip::udp::endpoint& _endpoint);
 
-	// Verify a message vector for system messages
-	void CheckForSystemMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime);
+	// Verify a message vector for internal messages
+	void CheckForInternalMessages(SmallPackPacker* _packer, std::vector<NetworkMessage>& _messageVector, uint32_t _totalTime, float _elapsedTime);
 
 	// Process a ping message
-	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, PingCommandType _type, uint32_t _totalTime);
+	virtual void ProcessPingMessage(SmallPackPacker* _packer, NetworkMessage* _message, CommandFlags _flags, uint32_t _totalTime);
 	
 	// Check if a sender has a communication channel
 	virtual SmallPackCommunicationChannel* GetSenderCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port, bool _createIfNeed);
 
 	// Create a new communication channel
 	virtual SmallPackCommunicationChannel* CreateCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port) = 0;
+
+	// Process a client connect info message
+	virtual void ProcessClientConnectMessage(SmallPackPacker* _packer, NetworkMessage* _message);
 
 ///////////////
 // VARIABLES //

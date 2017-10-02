@@ -46,12 +46,12 @@ enum class Operator
 
 enum class SystemCommands
 {
-	Ping,
+	None,
 	DeliveryConfirmation,
 	ClientConnectInfo
 };
 
-enum PingCommandType
+enum CommandFlags
 {
 	Request			= 1 << 0,
 	Answer			= 1 << 1
@@ -65,6 +65,7 @@ struct CommandDeliveryConfirmation
 
 struct CommandClientConnectionInfo
 {
+	CommandClientConnectionInfo() {}
 	CommandClientConnectionInfo(char* _ip, uint32_t _port, uint32_t _globalIdentifier, uint32_t _authToken) : port(_port), clientGlobalIdentifier(_globalIdentifier), clientAuthenticationToken(_authToken)
 	{
 		strcpy(ip, _ip);
@@ -91,6 +92,7 @@ struct MessageData
 {
 	unsigned char* dataPtr;
 	uint32_t dataSize;
+	uint32_t blockDataSize;
 };
 
 struct MessageHeader
@@ -102,7 +104,7 @@ struct MessageHeader
 	Operator messageOperator;
 
 	// The message command <what this message is about (ping, custom message, etc)>
-	uint32_t messageCommand;
+	SystemCommands messageCommand;
 
 	// The message id <internal identification of this message, used only by the CommunicationChannel>
 	uint32_t messageId;

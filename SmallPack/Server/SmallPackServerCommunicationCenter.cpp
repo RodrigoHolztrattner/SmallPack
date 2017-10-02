@@ -22,31 +22,36 @@ SmallPack::Server::SmallPackServerCommunicationCenter::~SmallPackServerCommunica
 
 void SmallPack::Server::SmallPackServerCommunicationCenter::BroadcastClientConnectionInfo(SmallPackPacker* _packer, uint32_t _currentTime)
 {
-	// Our new message
-	SmallPack::NetworkMessage newMessage;
-
-	// The client connection info
-	std::vector<CommandClientConnectionInfo> clientConnectionInfo;
-
-	//
-	//
-
-	// Set the client connection info data
-	clientConnectionInfo.push_back(CommandClientConnectionInfo("127.0.0.1", 22223, 0, 1));
-	clientConnectionInfo.push_back(CommandClientConnectionInfo("127.0.0.1", 22224, 1, 1));
-
-	//
-	//
-
-	// Compose our message
-	SmallPack::SmallPackMessageComposer::Compose(_packer, newMessage, SmallPack::Operator::System, (uint32_t)SystemCommands::ClientConnectInfo, 0, clientConnectionInfo.data(), clientConnectionInfo.size());
-
-	// For each client, send the message
+	// For each client
+	int globalIdentifier = 0;
 	for (auto & client : m_ClientConnections)
 	{
-		// Queue the message and commit it
-		client->QueueMessage(&newMessage);
-		client->CommitQueueMessage(_packer, _currentTime);
+		// Our new message
+		SmallPack::NetworkMessage newMessage;
+
+		// The client connection info
+		std::vector<CommandClientConnectionInfo> clientConnectionInfo;
+
+		// For each possible target
+		for (auto & target : m_ClientConnections)
+		{
+			// Check if the client and the target aren`t the same
+			if (client != target)
+			{
+				// Insert the message
+				clientConnectionInfo.push_back(CommandClientConnectionInfo((char*)target->GetAddress().to_string().c_str(), target->GetPort(), globalIdentifier, 1));
+
+				// Increment the global identifier
+				globalIdentifier++;
+			}
+
+			// Compose our message
+			SmallPack::SmallPackMessageComposer::Compose(_packer, newMessage, SmallPack::Operator::System, SystemCommands::ClientConnectInfo, 0, clientConnectionInfo.data(), clientConnectionInfo.size());
+
+			// Queue the message and commit it
+			client->QueueMessage(&newMessage);
+			client->CommitQueueMessage(_packer, _currentTime);
+		}
 	}
 }
 
@@ -69,6 +74,7 @@ bool SmallPack::Server::SmallPackServerCommunicationCenter::Initialize(uint16_t 
 	//
 
 	CreateClientCommunicationChannel(boost::asio::ip::address::from_string("127.0.0.1"), 22223);
+	CreateClientCommunicationChannel(boost::asio::ip::address::from_string("127.0.0.1"), 22224);
 
 	return true;
 }
@@ -87,5 +93,5 @@ bool SmallPack::Server::SmallPackServerCommunicationCenter::CreateClientCommunic
 
 SmallPack::SmallPackCommunicationChannel* SmallPack::Server::SmallPackServerCommunicationCenter::CreateCommunicationChannel(boost::asio::ip::address _senderAddress, uint32_t _port)
 {
-	return new SmallPackCommunicationChannel(m_ControllerData.ioService);
+	return new SmallPackCommunicationChannel(m_ControllerData.ioService, false);
 }

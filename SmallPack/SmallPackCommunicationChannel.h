@@ -38,8 +38,14 @@ class SmallPackCommunicationChannel
 {
 protected:
 
-	// The ping request time
-	static const uint32_t PingRequestInterval = 5000;
+	// The ping request time (milisseconds)
+	static const uint32_t PingRequestInterval = 1000;
+
+	// The time out amount (milisseconds)
+	static const uint32_t TimeOutAmount = 5000;
+
+	// The expire time amount (seconds)
+	static const uint32_t ExpireTimeAmount = 5;
 
 	// The channel data
 	struct ChannelData
@@ -92,7 +98,7 @@ protected:
 	};
 
 public:
-	SmallPackCommunicationChannel(boost::asio::io_service& _ioService);
+	SmallPackCommunicationChannel(boost::asio::io_service& _ioService, bool _canExpire);
 	//SmallPackCommunicationChannel(const SmallPackCommunicationChannel&);
 	~SmallPackCommunicationChannel();
 
@@ -104,8 +110,8 @@ public:
 	// Do the frame update for this communication channel
 	virtual void FrameUpdate(uint32_t _currentTime, float _timeElapsed);
 
-	// Process a system message
-	virtual void ProcessSystemMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime);
+	// Process a channel internal message
+	virtual void ProcessChannelInternalMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime);
 
 	// Process a ping message
 	virtual void ProcessPingAnswer(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime);
@@ -122,6 +128,18 @@ public:
 	// Request a ping message for this channel
 	void RequestPing();
 
+	// Reset the expiration timer for this channel
+	void ResetExpireTimer();
+
+	// If this channel should be reseted
+	bool ShouldDelete(uint32_t _currentTime, float _timeElapsed);
+
+	// Return the address
+	boost::asio::ip::address GetAddress() { return m_ChannelData.address; }
+
+	// Return the port
+	uint32_t GetPort() { return m_ChannelData.port; }
+
 protected:
 
 	// Process a sent message pack
@@ -135,6 +153,9 @@ protected:
 
 	// Set the channel authentication token
 	void SetAuthenticationToken(uint32_t _token);
+
+	// Set that this channel can expire
+	void SetCanExpire();
 
 private:
 
@@ -170,6 +191,10 @@ private:
 
 	// The message pack send queue
 	MessagePack* m_MessagePackSendList;
+
+	// If this connection channel can expire (and the expire time)
+	bool m_CanExpire;
+	float m_ExpireTime;
 };
 
 // SmallPack

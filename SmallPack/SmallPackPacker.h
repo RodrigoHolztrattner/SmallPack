@@ -95,7 +95,8 @@ protected:
 
 		// Set the data location
 		_messageData->dataPtr = selectedDataSlice;
-		_messageData->dataSize = requiredSize;
+		_messageData->dataSize = _size;
+		_messageData->blockDataSize = requiredSize;
 
 		return true;
 	}
