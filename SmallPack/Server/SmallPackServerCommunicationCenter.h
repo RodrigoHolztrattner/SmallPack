@@ -51,6 +51,9 @@ public:
 	// Broadcast the client connection info
 	void BroadcastClientConnectionInfo(SmallPackPacker* _packer, uint32_t _currentTime);
 
+	// Broadcast a message
+	void BroadcastMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime);
+
 	// Initialize the communication controller
 	bool Initialize(uint16_t _selfPort);
 

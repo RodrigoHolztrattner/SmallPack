@@ -232,7 +232,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 			// Prepare a ping answer
 			SmallPack::NetworkMessage newMessage; int dummyData = 0;
 			SmallPackMessageComposer::Compose(_packer, newMessage, SmallPack::Operator::System, SmallPack::SystemCommands::None, 0, &dummyData);
-			newMessage.messageHeader.messageFlags = SetFlag(newMessage.messageHeader.messageFlags, CommandFlags::Answer);
+			newMessage.messageHeader.messageFlags = SetFlag(newMessage.messageHeader.messageFlags, CommandFlags::PingAnswer);
 			PackMessage(newMessage, _packer);
 
 			// Log
@@ -258,7 +258,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		if (m_PingInfo.receivedRequestedPing)
 		{
 			// Adjust the request ping flag for the first message
-			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, CommandFlags::Answer);
+			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, CommandFlags::PingAnswer);
 
 			// Set that we sent the ping message
 			m_PingInfo.receivedRequestedPing = false;
@@ -268,7 +268,7 @@ void SmallPack::SmallPackCommunicationChannel::ProcessPingFunctionality(SmallPac
 		if (m_PingInfo.expectingPing)
 		{
 			// Adjust the expect ping flag for the first message
-			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, CommandFlags::Request);
+			m_SendQueue[0]->messageHeader.messageFlags = SetFlag(m_SendQueue[0]->messageHeader.messageFlags, CommandFlags::PingRequest);
 
 			// Set the last request time
 			m_PingInfo.lastRequestTime = _currentTime;

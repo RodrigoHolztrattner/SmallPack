@@ -55,6 +55,16 @@ void SmallPack::Server::SmallPackServerCommunicationCenter::BroadcastClientConne
 	}
 }
 
+void SmallPack::Server::SmallPackServerCommunicationCenter::BroadcastMessage(SmallPackPacker* _packer, NetworkMessage* _message, uint32_t _currentTime)
+{
+	// For each client
+	for (auto & client : m_ClientConnections)
+	{
+		// Queue the message and commit it
+		client->QueueMessage(_message);
+	}
+}
+
 bool SmallPack::Server::SmallPackServerCommunicationCenter::Initialize(uint16_t _selfPort)
 {
 	// Set the current port

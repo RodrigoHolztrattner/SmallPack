@@ -19,7 +19,7 @@ SmallPack::Client::SmallPackClientCommunicationCenter::~SmallPackClientCommunica
 {
 }
 
-bool SmallPack::Client::SmallPackClientCommunicationCenter::Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort)
+bool SmallPack::Client::SmallPackClientCommunicationCenter::Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort, uint32_t _authenticationToken)
 {
 	// Set the current port
 	m_ControllerData.currentPort = _selfPort;
@@ -31,7 +31,7 @@ bool SmallPack::Client::SmallPackClientCommunicationCenter::Initialize(const cha
 	std::cout << "Listenning on port: " << _selfPort << " and connected to server: " << _serverAddress << " at port: " << _serverPort << std::endl;
 
 	// Set our authentication token
-	m_ControllerData.authenticationToken = 1;
+	m_ControllerData.authenticationToken = _authenticationToken;
 
 	// Initialize the server connection
 	bool result = m_ServerConnection.Initialize(_serverAddress, _serverPort, m_ControllerData.currentPort, m_ControllerData.authenticationToken);

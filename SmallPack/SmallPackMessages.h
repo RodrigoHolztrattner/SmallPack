@@ -53,8 +53,9 @@ enum class SystemCommands
 
 enum CommandFlags
 {
-	Request			= 1 << 0,
-	Answer			= 1 << 1
+	PingRequest			= 1 << 0,
+	PingAnswer			= 1 << 1,
+	ServerEcho			= 1 << 2
 };
 
 struct CommandDeliveryConfirmation

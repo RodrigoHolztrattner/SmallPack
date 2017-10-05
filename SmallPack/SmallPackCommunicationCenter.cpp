@@ -114,12 +114,12 @@ void SmallPack::SmallPackCommunicationCenter::ProcessPingMessage(SmallPackPacker
 	}
 
 	// Check the ping type
-	if (_flags == CommandFlags::Answer)
+	if (_flags == CommandFlags::PingAnswer)
 	{
 		// Process the ping answer for this channel
 		communicationChannel->ProcessPingAnswer(_packer, _message, _totalTime);
 	}
-	else if (_flags == CommandFlags::Request)
+	else if (_flags == CommandFlags::PingRequest)
 	{
 		// Request a ping message from this channel
 		communicationChannel->RequestPing();
@@ -153,17 +153,17 @@ void SmallPack::SmallPackCommunicationCenter::CheckForInternalMessages(SmallPack
 		}
 
 		// Check the ping request
-		if (CheckFlag(currentMessage->messageHeader.messageFlags, CommandFlags::Request))
+		if (CheckFlag(currentMessage->messageHeader.messageFlags, CommandFlags::PingRequest))
 		{
 			// Process this ping message
-			ProcessPingMessage(_packer, currentMessage, CommandFlags::Request, _totalTime);
+			ProcessPingMessage(_packer, currentMessage, CommandFlags::PingRequest, _totalTime);
 		}
 
 		// Check the ping answer
-		if (CheckFlag(currentMessage->messageHeader.messageFlags, CommandFlags::Answer))
+		if (CheckFlag(currentMessage->messageHeader.messageFlags, CommandFlags::PingAnswer))
 		{
 			// Process this ping message
-			ProcessPingMessage(_packer, currentMessage, CommandFlags::Answer, _totalTime);
+			ProcessPingMessage(_packer, currentMessage, CommandFlags::PingAnswer, _totalTime);
 		}
 
 		// Check for system messages

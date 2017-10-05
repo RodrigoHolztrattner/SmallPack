@@ -70,7 +70,7 @@ int main()
 		std::cout << std::endl << std::endl;
 
 		// Initialize the communication controller so we can accept outside requests from other players
-		result = communcationCenter.Initialize(serverIp.c_str(), serverPort.c_str() , selfPort);
+		result = communcationCenter.Initialize(serverIp.c_str(), serverPort.c_str() , selfPort, 1);
 		if (!result)
 		{
 			// Cannot initialize the communication controller

@@ -55,7 +55,7 @@ public:
 public:
 
 	// Initialize the communication controller
-	bool Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort);
+	bool Initialize(const char* _serverAddress, const char* _serverPort, uint16_t _selfPort, uint32_t _authenticationToken);
 
 	// Send a message to all connected clients
 	bool BroadcastMessageToAllClients(SmallPackPacker* _packer, NetworkMessage& _message, uint32_t _totalTime);
